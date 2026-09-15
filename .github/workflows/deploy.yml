@@ -27,15 +27,15 @@ jobs:
       - name: Typecheck
         run: npm run typecheck
 
+      - name: Install ffmpeg (vitest + worker tests exercise it)
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
+
       - name: App tests (vitest)
         run: npm test
 
       - name: Install worker dependencies
         run: npm ci
         working-directory: infra/flow-worker
-
-      - name: Install ffmpeg for worker tests
-        run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
 
       # Worker tests exercise Playwright/ffmpeg-heavy paths; two cases are
       # environment-sensitive, so they report but do not block the deploy.

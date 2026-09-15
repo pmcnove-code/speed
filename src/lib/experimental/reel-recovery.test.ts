@@ -113,7 +113,7 @@ describe("reel recovery loop", () => {
     const workerJobId = "saved-job";
 
     const exhausted = errorCode !== "FLOW_TERMINAL" && attempts >= 8 && workerJobId;
-    expect(exhausted).toBe(true);
+    expect(Boolean(exhausted)).toBe(true);
 
     const finalErrorCode = "RECOVERY_EXHAUSTED";
     expect(finalErrorCode).toBe("RECOVERY_EXHAUSTED");

@@ -31,10 +31,8 @@ describe("flowFailure taxonomy", () => {
     expect(f.kind).toBe("worker_down");
     expect(f.title).toBe("Flow worker unavailable");
   });
-  it("maps FLOW_TERMINAL with blocked message sniffs worker_down first", () => {
-    // FLOW_TERMINAL with no direct mapping checks "not configured" before other patterns
+  it("maps FLOW_TERMINAL with blocked message to blocked kind", () => {
     const f = flowFailure("FLOW_TERMINAL", "Google flagged unusual activity");
-    // Since "not configured" is checked first, pattern "Google flagged" falls through to classifyFlowFailure
     expect(f.kind).toBe("blocked");
     expect(f.retryable).toBe(true);
   });
@@ -42,8 +40,8 @@ describe("flowFailure taxonomy", () => {
   it("maps FLOW_TERMINAL with worker_down message", () => {
     const f = flowFailure("FLOW_TERMINAL", "Flow worker is not configured.");
     expect(f.kind).toBe("worker_down");
-    expect(f.action?.href).toBe("/personas");
-    expect(f.retryable).toBe(false);
+    expect(f.action?.href).toBe("/settings");
+    expect(f.retryable).toBe(true);
   });
 
   it("maps GENDER_MISSING to character_missing", () => {

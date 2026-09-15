@@ -145,9 +145,9 @@ export function flowFailure(code: string | null | undefined, message: string): F
   }
 
 
-  // Step 2: If no kind mapped yet or FLOW_TERMINAL, sniff message for fallback
+  // Step 2: no direct code mapping (generic FLOW_TERMINAL wrapper included) — sniff the message
   if (!kind) {
-    if (code === "FLOW_TERMINAL" || /not configured/i.test(message)) {
+    if (/not configured/i.test(message)) {
       kind = "worker_down";
     } else if (/no Flow account/i.test(message)) {
       kind = "no_account";
