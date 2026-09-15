@@ -52,7 +52,7 @@ export function Sidebar({ role, totalSpend = 0 }: { role: "admin" | "member"; to
           <div className="text-sidebar-foreground/50 text-[11px] uppercase tracking-wide">Total spend</div>
           <div className="text-lg font-semibold tabular-nums">{formatUsd(totalSpend)}</div>
         </Link>
-        <div className="text-sidebar-foreground/50 mt-2 text-xs">Reel Copy Studio · v2</div>
+        <div className="text-sidebar-foreground/50 mt-2 text-xs">Carnivore · Reel Copy Studio · v2</div>
       </div>
     </aside>
   );
