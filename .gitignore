@@ -2,6 +2,7 @@
 
 # dependencies
 /node_modules
+/infra/flow-worker/node_modules/
 /.pnp
 .pnp.*
 .yarn/*
@@ -32,6 +33,12 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+
+# Flow browser sessions (cookies) — never commit
+/data/
+infra/flow-worker/data/
+**/flow-session*.json
+**/flow-sessions/
 
 # vercel
 .vercel

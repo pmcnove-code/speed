@@ -1,0 +1,12 @@
+/* Experimental workspace inherits the app's existing light/dark design tokens. */
+.experimental-workspace {
+  --color-studio-surface: var(--card);
+  --color-studio-rule: var(--border);
+  --color-studio-muted: var(--muted);
+  --color-studio-focus: var(--ring);
+  --space-studio-gap: 1rem;
+  --space-studio-panel: 1rem;
+  --radius-studio-panel: var(--radius);
+}
+
+html:has(.experimental-workspace), body:has(.experimental-workspace) { overflow-x: clip; }

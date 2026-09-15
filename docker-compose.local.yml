@@ -1,0 +1,15 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: copy
+      POSTGRES_PASSWORD: copy
+      POSTGRES_DB: copystudio
+    ports:
+      - "5440:5432"
+    volumes:
+      - cs_pgdata_local:/var/lib/postgresql/data
+
+volumes:
+  cs_pgdata_local:

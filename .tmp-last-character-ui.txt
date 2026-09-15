@@ -1,0 +1,79 @@
+https://flow.google.com/project/32ac2cab-1893-492c-86d8-9e5b18ca4a89
+inEditor=false
+
+## labels
+Learn more about how Google uses cookies. Opens in a new tab.
+Hide
+Home
+Editable text
+More options for the project
+Search
+Filtering and sorting options
+Add media menu
+Product help
+Tile grid settings
+More options
+Account details
+PRO tier
+Google Account: Vetements Chic (vetementschic1@gmail.com), Google membership
+Project navigation
+African Elder
+Favourite
+Ingredient
+Clear prompt
+Add ingredients to the prompt box
+Agent
+Settings trigger
+Start generation
+
+## edit hrefs
+
+
+## media
+IMG 42x42 @1358,17
+IMG 32x32 @1363,22
+IMG 250x250 @248,76
+IMG 50x50 @439,781
+
+## play_circle boxes
+
+
+## text
+Skip to main content
+home
+more_vert
+search
+filter_list
+add
+help
+settings_2
+more_vert
+PRO
+dashboard
+All media
+accessibility_new
+Characters
+movie
+Scenes
+apps_spark_2
+Tools
+delete
+Bin
+left_panel_close
+Collapse
+African Elder
+accessibility_new
+cancel
+accessibility_new
+close
+
+What do you want to create?
+
+add
+Agent
+Video · 720p · 8s
+crop_9_16
+x2
+arrow_forward
+
+Google Flow can make mistakes, so double-check it

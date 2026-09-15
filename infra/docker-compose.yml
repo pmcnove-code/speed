@@ -1,0 +1,125 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: copy
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: copystudio
+    volumes:
+      - cs_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U copy -d copystudio"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  app:
+    image: copy-studio:latest
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgres://copy:${POSTGRES_PASSWORD}@db:5432/copystudio
+      SESSION_SECRET: ${SESSION_SECRET}
+      VENICE_API_KEY: ${VENICE_API_KEY}
+      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY}
+      GROK_API_KEY: ${GROK_API_KEY:-}
+      XAI_API_KEY: ${XAI_API_KEY:-}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GEMINI_CLOUD_PROJECT: ${GEMINI_CLOUD_PROJECT:-}
+      GOOGLE_CLOUD_PROJECT: ${GOOGLE_CLOUD_PROJECT:-}
+      GOOGLE_API_KEY: ${GOOGLE_API_KEY:-}
+      AIRTABLE_TOKEN: ${AIRTABLE_TOKEN}
+      AIRTABLE_BASE_ID: ${AIRTABLE_BASE_ID:-}
+      AIRTABLE_TABLE: ${AIRTABLE_TABLE:-Posts}
+      DEEPGRAM_API_KEY: ${DEEPGRAM_API_KEY:-}
+      ADMIN_ACCESS_CODE: ${ADMIN_ACCESS_CODE}
+      MEMBER_ACCESS_CODE: ${MEMBER_ACCESS_CODE}
+      FLOW_WORKER_URL: http://flow-worker:8787
+      FLOW_WORKER_SECRET: ${FLOW_WORKER_SECRET}
+      HOSTNAME: "0.0.0.0"
+      NODE_ENV: production
+    depends_on:
+      db:
+        condition: service_healthy
+      flow-worker:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:3000/api/health >/dev/null"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 45s
+
+  reel-runner:
+    image: copy-studio:latest
+    restart: unless-stopped
+    command: ["npx", "tsx", "--tsconfig", "tsconfig.json", "scripts/reel-runner.ts"]
+    environment:
+      DATABASE_URL: postgres://copy:${POSTGRES_PASSWORD}@db:5432/copystudio
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GEMINI_CLOUD_PROJECT: ${GEMINI_CLOUD_PROJECT:-}
+      GOOGLE_CLOUD_PROJECT: ${GOOGLE_CLOUD_PROJECT:-}
+      GOOGLE_API_KEY: ${GOOGLE_API_KEY:-}
+      DEEPGRAM_API_KEY: ${DEEPGRAM_API_KEY:-}
+      FLOW_WORKER_URL: http://flow-worker:8787
+      FLOW_WORKER_SECRET: ${FLOW_WORKER_SECRET}
+      NODE_ENV: production
+    depends_on:
+      db:
+        condition: service_healthy
+      flow-worker:
+        condition: service_healthy
+      app:
+        condition: service_healthy
+
+  flow-worker:
+    build:
+      context: ..
+      dockerfile: infra/flow-worker/Dockerfile
+    restart: unless-stopped
+    shm_size: "1gb"
+    environment:
+      FLOW_WORKER_SECRET: ${FLOW_WORKER_SECRET}
+      FLOW_DATA_DIR: /data/flow-sessions
+      FLOW_HEADLESS: "1"
+      FLOW_STEALTH: ${FLOW_STEALTH:-1}
+      FLOW_GENERATION_TRANSPORT: ${FLOW_GENERATION_TRANSPORT:-ui}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GOOGLE_API_KEY: ${GOOGLE_API_KEY:-}
+      GEMINI_CLOUD_PROJECT: ${GEMINI_CLOUD_PROJECT:-}
+      FLOW_BRAIN_MODEL: ${FLOW_BRAIN_MODEL:-gemini-2.5-flash}
+      DEEPGRAM_API_KEY: ${DEEPGRAM_API_KEY:-}
+      DEEPGRAM_MODEL: ${DEEPGRAM_MODEL:-nova-3}
+    volumes:
+      - cs_flow_data:/data
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:8787/health').then((r)=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 20s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - cs_caddy_data:/data
+    depends_on:
+      - app
+
+volumes:
+  cs_pgdata:
+  cs_caddy_data:
+  cs_flow_data:

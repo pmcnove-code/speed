@@ -1,0 +1,14 @@
+# Bare-IP HTTP for now. To enable auto-HTTPS later, replace `:80` with your domain
+# (e.g. copy.example.com) and Caddy provisions a Let's Encrypt cert automatically.
+:80 {
+	handle {
+		encode gzip
+		reverse_proxy app:3000 {
+			transport http {
+				read_timeout 45m
+				write_timeout 45m
+				dial_timeout 10s
+			}
+		}
+	}
+}

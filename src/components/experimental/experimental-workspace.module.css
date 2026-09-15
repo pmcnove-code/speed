@@ -1,0 +1,69 @@
+/* Hallmark · pre-emit critique: P4 H5 E4 S5 R5 V4
+ * Hallmark · macrostructure: Workbench · genre: modern-minimal
+ * theme: existing Copy Studio neutral tokens / Geist · compact editor + preview · no decorative motion */
+.workspace { display:flex; flex-direction:column; gap:var(--space-studio-gap); height:calc(100dvh - 7rem); min-height:0; max-width:1440px; margin-inline:auto; }
+.heading { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:.75rem; flex-shrink:0; }
+.heading h1 { overflow-wrap:anywhere; min-width:0; }
+.panels { display:grid; grid-template-columns:minmax(0,1fr); gap:var(--space-studio-gap); flex:1; min-height:0; }
+.panel { display:flex; flex-direction:column; min-width:0; min-height:0; overflow:hidden; border:1px solid var(--color-studio-rule); border-radius:var(--radius-studio-panel); background:var(--color-studio-surface); }
+.panelHeading { display:flex; align-items:center; justify-content:space-between; gap:.75rem; padding:var(--space-studio-panel); border-bottom:1px solid var(--color-studio-rule); flex-shrink:0; }
+.editorTabs { display:flex; gap:.25rem; padding:.5rem var(--space-studio-panel); flex-shrink:0; }
+.editorBody { flex:1; min-height:0; overflow-y:auto; overscroll-behavior:contain; padding:.25rem var(--space-studio-panel) var(--space-studio-panel); }
+.scriptFields { display:flex; flex-direction:column; gap:1rem; min-height:0; }
+.spokenField { display:flex; flex-direction:column; flex:1; gap:.5rem; min-height:6rem; }
+.scriptInput { flex:1; min-height:4rem; resize:none; field-sizing:fixed; line-height:1.6; }
+.actionBar { display:flex; flex-direction:column; gap:.65rem; flex-shrink:0; padding:var(--space-studio-panel); border-top:1px solid var(--color-studio-rule); }
+.progress { padding:var(--space-studio-panel); border-bottom:1px solid var(--color-studio-rule); max-height:55%; overflow-y:auto; flex-shrink:0; }
+.previewBody { display:flex; align-items:center; justify-content:center; flex:1; min-height:0; overflow:hidden; padding:1rem; background:var(--color-studio-muted); }
+.videoFrame { height:100%; max-height:100%; aspect-ratio:9/16; max-width:100%; overflow:hidden; border-radius:var(--radius-studio-panel); }
+.emptyPreview { display:flex; flex-direction:column; align-items:center; justify-content:center; max-height:100%; overflow:auto; }
+.previewFooter { padding:var(--space-studio-panel); border-top:1px solid var(--color-studio-rule); flex-shrink:0; }
+.mobileNav { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.25rem; border:1px solid var(--color-studio-rule); padding:.25rem; border-radius:var(--radius-studio-panel); flex-shrink:0; }
+.mobileHidden { display:none; }
+.libraryRow { display:block; padding:.875rem; width:100%; text-align:left; border-radius:var(--radius); transition:background-color 120ms; }
+.libraryRow:hover { background:var(--accent); }
+.libraryRow:focus-visible { outline:2px solid var(--ring); outline-offset:-2px; }
+.workspace button { white-space:nowrap; min-height:44px; }
+.workspace input { min-height:44px; }
+.workspace select:focus-visible { outline:2px solid var(--color-studio-focus); outline-offset:2px; }
+@media(min-width:1100px) {
+  .panels { grid-template-columns:minmax(0,1.15fr) minmax(0,1fr); }
+  .mobileNav { display:none; }
+  .mobileHidden { display:flex; }
+}
+@media(max-height:700px) {
+  .workspace { --space-studio-gap:.75rem; --space-studio-panel:.75rem; }
+  .heading > div > p { display:none; }
+  .emptyPreview > div { width:4rem; }
+}
+@media(prefers-reduced-motion:reduce) { .libraryRow { transition:none; } }
+
+.libraryRow:active { background:var(--muted); }
+.libraryRow:disabled { opacity:.5; cursor:not-allowed; }
+.editorBody .editorTabs { padding:.5rem 0; }
+@media(max-width:640px) {
+ .heading { flex-wrap:nowrap; align-items:flex-start; }
+ .heading > div:first-child { flex:1; }
+ .heading > div:first-child > div { flex-wrap:wrap; }
+ .heading > div:first-child > p { display:none; }
+}
+
+/* Hallmark · pre-emit critique: P4 H5 E4 S5 R5 V4
+ * Generation workbench · existing neutral tokens · form / large progress / ordered queue */
+.monitorBody { padding:1.5rem; flex-shrink:0; }
+.activeProgress { padding-top:1.75rem; }
+.largeBar { margin-top:1.5rem; height:1.25rem; overflow:hidden; border-radius:999px; background:var(--muted); }
+.barFill { height:100%; width:100%; background:var(--primary); transform-origin:left; transition:transform 700ms ease; border-radius:inherit; }
+.steps { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:.75rem; margin-top:1.5rem; }
+.idleProgress { padding:2rem 0; }
+.queueHeading { padding:1rem 1.5rem; border-top:1px solid var(--color-studio-rule); border-bottom:1px solid var(--color-studio-rule); }
+.queueList { overflow-y:auto; min-height:6rem; flex:1; overscroll-behavior:contain; }
+.queueItem { display:flex; align-items:flex-start; gap:.75rem; padding:1rem 1.5rem; border-bottom:1px solid var(--color-studio-rule); }
+.queueItem:last-child { border-bottom:0; }
+.editorBody { padding-top:1rem; }
+.scriptFields { gap:.75rem; }
+.scriptInput { min-height:7rem; }
+@media(min-width:1100px) { .panels { grid-template-columns:minmax(360px,.9fr) minmax(0,1.2fr); } }
+@media(max-width:1099px) { .workspace { height:auto; min-height:calc(100dvh - 7rem); } .panel { min-height:30rem; } .editorBody { overflow:visible; } .queueList { max-height:28rem; } }
+@media(max-height:760px) and (min-width:1100px) { .monitorBody { padding:1rem; } .activeProgress { padding-top:1rem; } .steps { margin-top:1rem; } }
+@media(prefers-reduced-motion:reduce) { .barFill { transition:none; } }

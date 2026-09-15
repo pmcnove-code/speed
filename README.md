@@ -1,36 +1,89 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Reel Copy Studio v2
 
-## Getting Started
+Self-hosted, persona-driven short-form copy engine (Instagram Reels / TikTok) for the
+carnivore / animal-based niche. A professional dashboard variation of the original
+`ig-copy-engine`, with Venice AI and DeepSeek as swappable model backends.
 
-First, run the development server:
+## What it does
+
+- Access-code login with **admin** and **member** roles (only admins create/edit personas and manage settings).
+- Landing generator: **"Generate copy for all existing personas"**, N posts per persona (default 4), pick Venice or DeepSeek, watch a live per-persona pipeline animation (writing → dedup → done) synced to the backend over SSE, then browse results and copy any post.
+- Personas, formats, generation history, and an angle bank, all in Postgres.
+
+## Stack
+
+Next.js 16 (App Router) · Tailwind v4 + shadcn/ui · Framer Motion · Drizzle + Postgres 16 ·
+Docker Compose behind Caddy. Model calls go through an OpenAI-compatible client
+(`src/lib/llm/provider.ts`); the generation logic is a TypeScript port of the proven v1
+Python engine (`src/lib/engine/`).
+
+## Local dev
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+cp .env.example .env.local      # fill VENICE_API_KEY + access codes
+docker compose -f docker-compose.local.yml up -d      # Postgres on :5440
+npm install
+npm ci --prefix infra/flow-worker    # browser adapter + worker test dependencies
+npx tsx scripts/migrate.ts       # or: apply drizzle/*.sql
+npx tsx scripts/seed.ts          # personas, formats, angle bank, access codes
+npm run dev                      # http://localhost:3000
+npm test                         # engine unit tests
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Deploy to the VPS (62.83.10.231)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+export VENICE_API_KEY=...        # DEEPSEEK_API_KEY optional
+./infra/provision.sh             # one-time: installs Docker, writes .env, prints access codes
+./infra/deploy.sh                # rsync + docker compose up --build
+# → http://62.83.10.231
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+To enable HTTPS later, point a domain at the box and change `:80` to the domain in
+`infra/Caddyfile` — Caddy provisions a certificate automatically.
 
-## Learn More
+## Google Flow / Select Omni
 
-To learn more about Next.js, take a look at the following resources:
+Flow is a Google **user** product. GCP service accounts cannot log in. Experimental
+talks to a `flow-worker` sidecar that keeps one signed-in Chrome profile per account.
+Generation jobs are serialized, and extra requests wait in the worker queue instead
+of opening competing Flow sessions.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+The worker uses `puppeteer-extra-plugin-stealth` through `playwright-extra` for
+login, session probes, and generation. `FLOW_STEALTH=1` is the default; set it to
+`0` and recreate the worker to use plain Playwright. This changes the browser's
+automation fingerprint, not the server's IP address. Google may still reject a
+generation. A Google rejection ends that job; connected accounts remain available
+for manual retries.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+To verify the browser integration without contacting Google or spending credits:
 
-## Deploy on Vercel
+```bash
+docker compose -f infra/docker-compose.yml --env-file .env exec -T flow-worker node browser-smoke.mjs
+docker compose -f infra/docker-compose.yml --env-file .env exec -T flow-worker node tile-smoke.mjs
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+The default `FLOW_GENERATION_TRANSPORT=ui` uses the Flow composer. Setting
+`FLOW_GENERATION_TRANSPORT=rpc` uses the same signed-in browser session to call
+Flow's private frontend RPCs without generation UI clicks. RPC mode requires a
+project and character created by the normal setup flow first. It is an undocumented
+Google protocol and remains subject to Flow's credits, reCAPTCHA, and unusual-activity
+limits; it does not bypass an account restriction.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Multiple Google accounts are stored under `/data/flow-sessions`; jobs auto-rotate
+to an account that still has credits.
+
+Worker (docker network only, `x-flow-secret` header):
+
+- `POST /jobs` `{ hook, script, captions }`
+- `GET /jobs/:id`
+- `GET /jobs/:id/video`
+- `GET /accounts` / session upload + disconnect
+
+If no Flow session is connected, Experimental uses the official Gemini Omni API key
+(720p) and falls back to Gemini stills.
+
+## Enabling DeepSeek
+
+Set `DEEPSEEK_API_KEY` (server env) and redeploy. Until then the DeepSeek option shows as
+disabled in the generator; Venice runs everything.

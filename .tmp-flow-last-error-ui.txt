@@ -1,0 +1,86 @@
+https://flow.google.com/project/f723575a-de30-4856-b662-88e28d1d4f28/edit/4accf9c9-e7c1-4683-aea4-c3ebe1176d66
+inEditor=true
+
+## labels
+Learn more about how Google uses cookies. Opens in a new tab.
+Hide
+Back button to go to previous page
+Previous media
+Elder cooking breakfast at dawn
+Elder cooking eggs and liver
+Next media
+Restore
+Delete permanently
+Done editing scene
+Scene video preview
+Save frame
+Mute
+Skip to previous clip
+Play
+Skip to next clip
+Full screen
+Zoom out
+Zoom in
+Google Account: Vetements Chic (vetementschic1@gmail.com), Google membership
+
+## edit hrefs
+
+
+## media
+IMG 30x30 @656,23
+IMG 25x25 @689,26
+IMG 25x25 @719,26
+IMG 25x25 @749,26
+CANVAS 1052x592 @190,92
+IMG 103x58 @23,819
+IMG 103x58 @126,819
+IMG 103x58 @229,819
+IMG 103x58 @332,819
+IMG 103x58 @435,819
+IMG 103x58 @539,819
+IMG 103x58 @642,819
+IMG 103x58 @745,819
+IMG 42x42 @1399,-1
+IMG 32x32 @1404,4
+
+## play_circle boxes
+
+
+## text
+Skip to main content
+arrow_back
+Elder cooking breakfast at dawn
+BINNED
+undo
+delete
+Done
+add_photo_alternate
+volume_up
+Current time:
+00:00:00
+skip_previous
+play_arrow
+skip_next
+Total duration:
+00:00:00
+fullscreen
+00
+01
+02
+03
+04
+05
+06
+07
+08
+09
+10
+11
+12
+13
+14
+15
+zoom_out
+zoom_in
+
+Google Flow can make mistakes, so double-check it

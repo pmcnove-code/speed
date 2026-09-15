@@ -1,0 +1,64 @@
+https://flow.google.com/project/32ac2cab-1893-492c-86d8-9e5b18ca4a89/character/8d7deec2-22cd-4409-972d-cba7387bb048
+inEditor=false
+
+## labels
+Learn more about how Google uses cookies. Opens in a new tab.
+Hide
+Go back
+Editable text
+Favourite
+Delete
+historyHide history
+Done
+Character name
+Edit name
+voice_selectionSelect a voice
+Character personality
+Portrait
+accessibility_newCreate body
+Add ingredients to the prompt box
+Format
+Select model family
+Settings trigger
+Start generation
+Google Account: Vetements Chic (vetementschic1@gmail.com), Google membership
+
+## edit hrefs
+
+
+## media
+IMG 42x42 @1399,-1
+IMG 32x32 @1404,4
+
+## play_circle boxes
+
+
+## text
+Skip to main content
+arrow_back
+favorite
+delete
+history
+Hide history
+Done
+edit
+voice_selection
+Select a voice
+Character info (optional)
+The Flow agent can use this information to help craft scenes with your character.
+Portrait
+accessibility_new
+Create body
+
+What do you want to change?
+
+add
+personal_recommendations
+Format
+🍌 Nano Banana Pro
+arrow_drop_down
+arrow_forward
+image
+1%
+
+Google Flow can make mistakes, so double-check it

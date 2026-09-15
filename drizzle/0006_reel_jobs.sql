@@ -1,0 +1,21 @@
+CREATE TABLE IF NOT EXISTS "reel_jobs" (
+	"id" serial PRIMARY KEY NOT NULL,
+	"status" varchar(16) DEFAULT 'queued' NOT NULL,
+	"stage" varchar(24) DEFAULT 'script' NOT NULL,
+	"stage_detail" text DEFAULT '' NOT NULL,
+	"error" text,
+	"post_id" integer,
+	"hook" text NOT NULL,
+	"script" text NOT NULL,
+	"on_screen_text" jsonb DEFAULT '[]'::jsonb NOT NULL,
+	"cta" text DEFAULT '' NOT NULL,
+	"video_brief" text DEFAULT '' NOT NULL,
+	"storyboard" jsonb,
+	"video" bytea,
+	"video_mime" varchar(64),
+	"duration_ms" integer,
+	"model" varchar(80),
+	"created_by" varchar(64) NOT NULL,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"finished_at" timestamp
+);

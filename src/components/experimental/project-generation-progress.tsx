@@ -1,0 +1,13 @@
+'use client';
+import {LoaderCircle,CheckCircle2,AlertCircle} from 'lucide-react';
+import {projectProgress,type ProjectStatus} from '@/lib/experimental/project-progress';
+export function ProjectGenerationProgress({data,ready,total,starting,reelId}:{data:ProjectStatus;ready:number;total:number;starting:boolean;reelId:number}){
+ const p=projectProgress(data,ready,total,starting);
+ return <div className="space-y-4 rounded-xl border bg-muted/20 p-4 sm:p-5" aria-label="Regeneration progress">
+  <div className="flex items-start gap-3">{p.busy?<LoaderCircle aria-hidden className="mt-0.5 size-5 shrink-0 animate-spin motion-reduce:animate-none"/>:p.failed?<AlertCircle aria-hidden className="size-5 shrink-0 text-destructive"/>:<CheckCircle2 aria-hidden className="size-5 shrink-0"/>}<div className="min-w-0 flex-1"><h2 className="font-semibold">{p.busy?'Creating your video':p.failed?'Video needs attention':'Regeneration complete'}</h2><p role="status" aria-live="polite" className="mt-1 text-sm text-muted-foreground">{p.message}</p></div><span className="text-sm font-semibold tabular-nums">{p.percent}%</span></div>
+  <div><div className="mb-2 flex justify-between text-xs text-muted-foreground"><span>Estimated overall progress</span><span>{ready} / {total} clips ready</span></div><div role="progressbar" aria-label="Regeneration progress" aria-valuemin={0} aria-valuemax={100} aria-valuenow={p.percent} aria-valuetext={p.message} className="h-2 overflow-hidden rounded-full bg-muted"><div className={`h-full rounded-full transition-[width] duration-700 motion-reduce:transition-none ${p.failed?'bg-destructive':'bg-primary'} ${p.busy?'animate-pulse motion-reduce:animate-none':''}`} style={{width:`${p.percent}%`}}/></div></div>
+  <ol className="grid grid-cols-2 gap-3 text-xs sm:grid-cols-4">{['Prepare','Generate clips','Edit clips','Stitch & finish'].map((label,index)=><li key={label} aria-current={p.busy&&index===p.step?'step':undefined} className={`flex items-center gap-2 ${index>p.step?'text-muted-foreground':''}`}><span className="flex size-6 shrink-0 items-center justify-center rounded-full border">{index<p.step?'✓':index===p.step&&p.busy?<LoaderCircle aria-hidden className="size-3 animate-spin motion-reduce:animate-none"/>:index+1}</span>{label}</li>)}</ol>
+  {p.done&&data.job?.stage==='stitch'&&<a className="inline-block text-sm underline underline-offset-4" href={`/experimental/history?q=${reelId}`}>Watch your finished video</a>}
+  {p.detail&&<details className="text-xs text-muted-foreground"><summary className="cursor-pointer">All processing updates</summary><pre className="mt-3 max-h-56 overflow-y-auto whitespace-pre-wrap break-words font-sans leading-relaxed">{p.detail}</pre></details>}
+ </div>;
+}

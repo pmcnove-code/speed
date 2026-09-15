@@ -1,0 +1,107 @@
+https://flow.google.com/project/f723575a-de30-4856-b662-88e28d1d4f28
+inEditor=false
+
+## labels
+Learn more about how Google uses cookies. Opens in a new tab.
+Hide
+Home
+Editable text
+More options for the project
+Search
+Filtering and sorting options
+Add media menu
+Product help
+Tile grid settings
+More options
+Account details
+PRO tier
+Google Account: Vetements Chic (vetementschic1@gmail.com), Google membership
+Project navigation
+Clear prompt
+Add ingredients to the prompt box
+Agent
+Settings trigger
+Start generation
+Undo
+View in bin
+Dismiss
+Category navigation
+dashboardAll
+imageImages
+videocamVideos
+voice_selectionVoices
+accessibility_newCharacters
+drive_folder_uploadUploads
+uploadUpload media
+Search assets
+Sort assets
+
+## edit hrefs
+
+
+## media
+IMG 42x42 @1358,17
+IMG 32x32 @1363,22
+
+## play_circle boxes
+
+
+## text
+Skip to main content
+Start creating or drop media
+home
+more_vert
+search
+filter_list
+add
+help
+settings_2
+more_vert
+PRO
+dashboard
+All media
+accessibility_new
+Characters
+movie
+Scenes
+apps_spark_2
+Tools
+delete
+Bin
+left_panel_close
+Collapse
+
+Professional photoreal 9:16 cinematic reel, 24fps, part 3 of 6 of one ongoing conversation. Paid-social finish, not a webcam, not stock, not cartoon, not plastic AI skin. Same person and face as the attached image ingredient (African Elder). Same wardrobe. Same custom voice named African Elder. Identity lock. Do not recast. 35mm look, motivated camera, natural window or practical light, real catchlights, skin texture, filmic contrast. Camera lock OFF. The CAMERA MAY MOVE and the SURROUNDINGS SHOULD CHANGE. Visual brief (do not write this on screen): Two-shot contrast: first, a grim early morning with a mug of black coffee. Second, the speaker outside at dawn, energized, cooking eggs and liver in butter. Fast cuts between the 'old way' and the 'new way.' The talk continues — surroundings should change with the words. Mix medium close-up with a motivated insert of whatever they name, then return to the face. They were just saying: "Not the good tired. The empty tired. Before the sun, already drained. Coffee was my breakfast." Keep talking from that thought. No greeting, no recap. Speak this next part verbatim, word for word, with natural lipsync: "The doctor named it: low T. He wanted a needle. I wanted to know why." Stage the shot to match those words: camera can push, drift, walk, or reframe. Change the background, lighting, and setting as the idea changes. Add or reveal objects, food, tools, rooms, or people that the line is actually about. If they mention meat, show meat. If they mention a scale, a kitchen, a truck, a clinic — put it in the frame. They will keep talking after this with: "They had me eating lean. Grains. 'Heart-healthy' cereal. I traded the cereal for eggs and liver." Leave the world ready to keep evolving. Performance: real micro-movement, blinks, breath, weight shifts. Clear confident English. No dead air. Do not burn captions, subtitles, or any on-screen text into the picture — we add hook / screen lines / CTA in post. No BGM, no music, no extra voiceover. Do not add or drop spoken words. No silence at the start or end. Do not truncate the last word. No morphing, no extra limbs, no logos.
+
+close
+close
+Agent
+Video · 720p · 8s
+crop_16_9
+x2
+arrow_forward
+
+Google Flow can make mistakes, so double-check it
+
+info
+2 items moved to bin
+Undo
+View in bin
+Dismiss
+dashboard
+All
+image
+Images
+videocam
+Videos
+voice_selection
+Voices
+accessibility_new
+Characters
+drive_folder_upload
+Uploads
+upload
+Upload media
+search
+Recent
+No assets found.

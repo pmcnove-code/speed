@@ -1,0 +1,203 @@
+https://flow.google.com/project/32ac2cab-1893-492c-86d8-9e5b18ca4a89
+inEditor=false
+
+## labels
+Learn more about how Google uses cookies. Opens in a new tab.
+Hide
+Home
+Editable text
+More options for the project
+Search
+Filtering and sorting options
+Add media menu
+Product help
+Tile grid settings
+More options
+Account details
+PRO tier
+Google Account: Vetements Chic (vetementschic1@gmail.com), Google membership
+Project navigation
+Man speaking about testosterone …
+Favourite
+Reuse prompt
+play_circleMan speaking about testosterone …
+Retry
+Delete
+Elder speaking about testosteron…
+play_circleElder speaking about testosteron…
+Character speaking dialogue outd…
+play_circleCharacter speaking dialogue outd…
+Elder speaking dialogue about king
+play_circleElder speaking dialogue about king
+Character speaking dialogue abou…
+play_circleCharacter speaking dialogue abou…
+Elder speaking about new king
+play_circleElder speaking about new king
+Character speaking dialogue inst…
+play_circleCharacter speaking dialogue inst…
+Man speaking video production in…
+play_circleMan speaking video production in…
+Elder speaking about fire famine
+play_circleElder speaking about fire famine
+Elder speaking about diet
+play_circleElder speaking about diet
+Lion dialogue video production i…
+play_circleLion dialogue video production i…
+Man delivering dialogue on camera
+play_circleMan delivering dialogue on camera
+Elder speaking about hormone health
+play_circleElder speaking about hormone health
+Man discussing diet ingredients
+play_circleMan discussing diet ingredients
+Doctor prescribing testosterone …
+play_circleDoctor prescribing testosterone …
+Copy Studio
+Speaker discussing dietary fat h…
+play_circleSpeaker discussing dietary fat h…
+Character speaking about morning…
+play_circleCharacter speaking about morning…
+Person speaking about morning alarm
+play_circlePerson speaking about morning alarm
+Add ingredients to the prompt box
+Agent
+Settings trigger
+Start generation
+
+## edit hrefs
+
+
+## media
+IMG 42x42 @1358,17
+IMG 32x32 @1363,22
+IMG 152x270 @248,76
+IMG 152x270 @416,76
+IMG 152x270 @920,76
+IMG 152x270 @1088,76
+IMG 152x270 @1256,76
+IMG 152x270 @248,362
+IMG 152x270 @416,362
+IMG 152x270 @584,362
+IMG 152x270 @752,362
+IMG 152x270 @920,362
+IMG 152x270 @1088,362
+IMG 152x270 @1256,362
+IMG 152x270 @248,648
+IMG 152x270 @416,648
+IMG 152x270 @584,648
+IMG 152x270 @752,648
+IMG 152x270 @920,648
+IMG 152x270 @1088,648
+IMG 152x270 @1256,648
+IMG 152x270 @248,935
+IMG 152x270 @416,935
+IMG 152x270 @584,935
+IMG 152x270 @752,935
+
+## play_circle boxes
+128x18 @260,316 vis=true
+128x18 @428,316 vis=true
+128x18 @932,316 vis=true
+128x18 @1100,316 vis=true
+128x18 @1268,316 vis=true
+128x18 @260,602 vis=true
+128x18 @428,602 vis=true
+128x18 @596,602 vis=true
+128x18 @764,602 vis=true
+128x18 @932,602 vis=true
+
+## text
+Skip to main content
+home
+more_vert
+search
+filter_list
+add
+help
+settings_2
+more_vert
+PRO
+dashboard
+All media
+videocam
+Videos
+accessibility_new
+Characters
+movie
+Scenes
+apps_spark_2
+Tools
+delete
+Bin
+left_panel_close
+Collapse
+play_circle
+play_circle
+warning
+Failed
+We noticed some unusual activity. Please visit the Help Centre for more information.
+You have not been charged for this generation.
+refresh
+undo
+delete_forever
+warning
+Failed
+We noticed some unusual activity. Please visit the Help Centre for more information.
+You have not been charged for this generation.
+refresh
+undo
+delete_forever
+play_circle
+play_circle
+play_circle
+play_circle
+play_circle
+play_circle
+play_circle
+play_circle
+play_circle
+play_circle
+play_circle
+play_circle
+play_circle
+play_circle
+play_circle
+play_circle
+play_circle
+play_circle
+play_circle
+play_circle
+play_circle
+play_circle
+play_circle
+play_circle
+play_circle
+play_circle
+play_circle
+play_circle
+play_circle
+play_circle
+play_circle
+play_circle
+play_circle
+play_circle
+play_circle
+play_circle
+Copy Studio
+accessibility_new
+play_circle
+play_circle
+play_circle
+play_circle
+play_circle
+play_circle
+
+What do you want to create?
+
+add
+Agent
+Video · 720p · 8s
+crop_9_16
+x2
+arrow_forward
+
+Google Flow can make mistakes, so double-check it

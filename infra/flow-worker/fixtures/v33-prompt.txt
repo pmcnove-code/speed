@@ -1,0 +1,17 @@
+Fictional comedy sketch, educational parody. Use the attached image as the character. Use the attached voice exactly as provided — do not generate a different voice under any circumstances.
+
+The character must look visually identical to the attached image in every detail — same face, same hair, same clothing, same accessories, same features. Do not alter, reinterpret, or reimagine any part of the character's appearance.
+
+The background and setting must match the attached image exactly — do not change, add, or remove any element from the scene. No new objects, no new people, no scene changes.
+
+Medium close-up framing, character centered in frame, facing directly toward camera. Static camera, fixed framing, no camera movement, no zoom, no pan, no dolly, no tilt, no rotation.
+
+POSE CONTINUITY LOCK: The character's body pose and physical position must remain consistent with the attached reference image across EVERY clip. Preserve the exact torso angle, shoulder position, arm position, hand position, sitting position, body orientation, and overall posture. The starting pose of every clip must match the reference pose exactly, regardless of the previous clip. Do not reposition, straighten, lean, rotate, shift, or otherwise alter the character's body or limbs. Preserve the same overall body silhouette.
+
+Natural micro-movements are allowed only to make the performance feel human: subtle head movement, eye blinks, facial expression changes, and very slight hand/arm movement are allowed ONLY when they do NOT change the character's overall base pose, body orientation, or silhouette. The character must return to and maintain the same base pose throughout the clip.
+
+No subtitles. No text overlay. No lower thirds. No watermarks.
+
+Absolute audio isolation — zero background sound of any kind. No music, no ambient sound, no sound effects, no environmental audio, no medical equipment sounds, no nature sounds, no crowd noise, no breathing, no body sounds, no room tone, no hum, no static. The ONLY audio in the entire clip is the character's voice.
+
+Speak ONLY these exact words, nothing before, nothing after: "Exact words stay here."

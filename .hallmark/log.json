@@ -1,0 +1,52 @@
+[
+  {
+    "date": "2026-09-12",
+    "macrostructure": "Generation workbench",
+    "theme": "Existing Copy Studio neutral / Geist",
+    "enrichment": "none",
+    "brief": "Generation-only form, large progress monitor and chronological queue; explicit character reference description",
+    "verifiedWidths": [
+      320,
+      375,
+      414,
+      768,
+      1024,
+      1440
+    ]
+  },
+  {
+    "date": "2026-09-10",
+    "macrostructure": "Workbench",
+    "theme": "Existing Copy Studio neutral / Geist",
+    "enrichment": "none",
+    "brief": "Compact Experimental editor and preview with persistent action, searchable library and mobile view switching"
+  },
+  {
+    "date": "2026-09-11",
+    "macrostructure": "Results workbench",
+    "theme": "Existing Copy Studio neutral / Geist",
+    "enrichment": "none",
+    "brief": "Individual clip downloads with manual automatic-edit-and-stitch action; desktop split panes and mobile Clips/Preview tabs",
+    "verifiedWidths": [
+      320,
+      375,
+      414,
+      768,
+      1366
+    ]
+  },
+  {
+    "date": "2026-09-12",
+    "macrostructure": "Video library and project detail",
+    "theme": "Existing Copy Studio neutral / Geist",
+    "enrichment": "native media players",
+    "brief": "Separate searchable paginated generation history and project clip downloads",
+    "verifiedWidths": [
+      320,
+      375,
+      414,
+      768,
+      1366
+    ]
+  }
+]

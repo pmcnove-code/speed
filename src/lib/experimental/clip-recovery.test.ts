@@ -1,0 +1,14 @@
+import {beforeEach,expect,it,vi} from 'vitest';
+const m=vi.hoisted(()=>({session:vi.fn(),select:vi.fn(),worker:vi.fn(),update:vi.fn(),set:vi.fn(),where:vi.fn()}));
+vi.mock('@/lib/session',()=>({getSession:m.session}));
+vi.mock('@/db',()=>({db:{select:m.select,update:m.update},t:{reelJobs:{id:'id',workerJobId:'worker',status:'status'}}}));
+vi.mock('./flow-worker',()=>({regenerateFlowClips:m.worker}));
+import {POST} from '@/app/api/experimental/reels/[id]/clips/regenerate/route';
+const call=(body:unknown={requestId:'request-0001'},origin='http://test')=>POST(new Request('http://test/api',{method:'POST',headers:{origin},body:JSON.stringify(body)}),{params:Promise.resolve({id:'94'})});
+beforeEach(()=>{vi.resetAllMocks();m.session.mockResolvedValue({role:'admin'});m.select.mockReturnValue({from:()=>({where:async()=>[{workerJobId:'saved-worker'}]})});m.update.mockReturnValue({set:m.set});m.set.mockReturnValue({where:m.where});m.where.mockResolvedValue(undefined);m.worker.mockResolvedValue(Response.json({job:{status:'queued',stageDetail:'Recovering C05 and C07'}}));});
+it('requires login and same origin before recovering',async()=>{m.session.mockResolvedValue(null);expect((await call()).status).toBe(401);m.session.mockResolvedValue({});expect((await call(undefined,'http://evil')).status).toBe(403);expect(m.worker).not.toHaveBeenCalled();});
+it('rejects arbitrary clip/script overrides',async()=>{expect((await call({requestId:'request-0001',script:'changed'})).status).toBe(400);expect(m.worker).not.toHaveBeenCalled();});
+it('recovers the bound worker project and wakes the app runner only after acceptance',async()=>{expect((await call()).status).toBe(200);expect(m.worker).toHaveBeenCalledWith('saved-worker','request-0001');expect(m.set).toHaveBeenCalledWith(expect.objectContaining({status:'queued',stage:'clips',error:null}));});
+it('does not queue app work when the worker rejects the request',async()=>{m.worker.mockResolvedValue(Response.json({error:'Already processing'},{status:409}));expect((await call()).status).toBe(409);expect(m.update).not.toHaveBeenCalled();});
+it('passes a validated single-clip selection to the bound worker',async()=>{expect((await call({requestId:'single-request',clipId:'C05'})).status).toBe(200);expect(m.worker).toHaveBeenCalledWith('saved-worker','single-request','C05');});
+it('rejects unsafe individual clip paths',async()=>{expect((await call({requestId:'single-request',clipId:'../C05'})).status).toBe(400);expect(m.worker).not.toHaveBeenCalled();});

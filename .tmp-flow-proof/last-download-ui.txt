@@ -1,0 +1,262 @@
+https://flow.google.com/project/32ac2cab-1893-492c-86d8-9e5b18ca4a89
+inEditor=false
+
+## labels
+Learn more about how Google uses cookies. Opens in a new tab.
+Hide
+Home
+Editable text
+More options for the project
+Search
+Filtering and sorting options
+Add media menu
+Product help
+Tile grid settings
+More options
+Account details
+PRO tier
+Google Account: Vetements Chic (vetementschic1@gmail.com), Google membership
+Project navigation
+Dismiss credit banner
+Man speaking about low testosterone
+Favorite
+Reuse prompt
+Person speaking about morning ro…
+Retry
+Character speaking morning alarm…
+Person discussing morning alarm …
+Character speaking about body he…
+Man speaking about starving
+Man speaking dialogue at fire
+Copy Studio
+King coronation video production…
+New king crowned dialogue script
+Elder speaking about fat health
+Man speaking about health and fa…
+Elder speaking about body weight
+Character speaking about morning…
+old man
+play_circleold man
+Man speaking about testosterone …
+Elder speaking about testosteron…
+Character speaking dialogue outd…
+Elder speaking dialogue about king
+Character speaking dialogue abou…
+Elder speaking about new king
+Character speaking dialogue inst…
+Man speaking video production in…
+Elder speaking about fire famine
+Elder speaking about diet
+Lion dialogue video production i…
+Man delivering dialogue on camera
+Elder speaking about hormone health
+Man discussing diet ingredients
+Doctor prescribing testosterone …
+Speaker discussing dietary fat h…
+Add ingredients to the prompt box
+Agent
+Settings trigger
+Start generation
+favoriteFavorite
+keyboard_returnReuse prompt
+play_moviesAdd to scene
+add_2Add to prompt
+downloadDownload
+content_copyCopy
+editRename
+shareShare
+video_libraryPublish to YouTube
+photo_librarySet project cover
+flagFlag output
+deleteMove to trash
+addNew scene
+
+## edit hrefs
+
+
+## media
+IMG 42x42 @1322,17
+IMG 32x32 @1327,22
+IMG 147x261 @248,154
+IMG 147x261 @899,154
+IMG 147x261 @1062,154
+IMG 147x261 @1225,154
+IMG 147x261 @248,431
+IMG 147x261 @411,431
+IMG 147x261 @574,431
+IMG 149x265 @248,708
+IMG 471x265 @413,708
+IMG 471x265 @901,708
+IMG 147x261 @248,989
+IMG 147x261 @411,989
+IMG 147x261 @574,989
+IMG 147x261 @737,989
+IMG 147x261 @899,989
+IMG 147x261 @1062,989
+IMG 147x261 @1225,989
+IMG 147x261 @248,1266
+IMG 147x261 @411,1266
+IMG 147x261 @574,1266
+IMG 147x261 @737,1266
+IMG 147x261 @899,1266
+IMG 147x261 @1062,1266
+
+## play_circle boxes
+123x18 @260,385 vis=true
+123x18 @911,385 vis=true
+123x18 @1074,385 vis=true
+123x18 @1237,385 vis=true
+123x18 @260,662 vis=true
+123x18 @423,662 vis=true
+123x18 @586,662 vis=true
+125x18 @260,943 vis=true
+66x18 @425,943 vis=true
+66x18 @913,943 vis=true
+
+## text
+Skip to main content
+home
+more_vert
+search
+filter_list
+add
+help
+settings_2
+more_vert
+PRO
+dashboard
+All media
+videocam
+Videos
+accessibility_new
+Characters
+movie
+Scenes
+apps_spark_2
+Tools
+delete
+Trash
+left_panel_close
+Collapse
+info
+You're running low on Google Flow credits. Your credits will reset monthly, or top up to get more now.
+open_in_new
+Add AI credits
+close
+play_circle
+warning
+Failed
+The video failed to load.
+refresh
+warning
+Failed
+The video failed to load.
+refresh
+warning
+Failed
+The video failed to load.
+refresh
+play_circle
+play_circle
+play_circle
+play_circle
+play_circle
+play_circle
+warning
+Failed
+The video failed to load.
+refresh
+warning
+Failed
+The video failed to load.
+refresh
+warning
+Failed
+The video failed to load.
+refresh
+warning
+Failed
+The video failed to load.
+refresh
+play_circle
+play_circle
+play_circle
+play_circle
+play_circle
+play_circle
+play_circle
+play_circle
+play_circle
+play_circle
+play_circle
+play_circle
+play_circle
+play_circle
+play_circle
+play_circle
+play_circle
+play_circle
+play_circle
+play_circle
+play_circle
+play_circle
+play_circle
+play_circle
+play_circle
+play_circle
+play_circle
+play_circle
+play_circle
+play_circle
+play_circle
+play_circle
+play_circle
+play_circle
+play_circle
+play_circle
+play_circle
+play_circle
+play_circle
+play_circle
+play_circle
+Copy Studio
+accessibility_new
+play_circle
+play_circle
+What do you want to create?
+
+add
+Agent
+Video · 720p · 8s
+crop_9_16
+x1
+arrow_forward
+
+Google Flow can make mistakes, so double check it
+
+favorite
+Favorite
+keyboard_return
+Reuse prompt
+play_movies
+Add to scene
+add_2
+Add to prompt
+download
+Download
+content_copy
+Copy
+edit
+Rename
+share
+Share
+video_library
+Publish to YouTube
+photo_library
+Set project cover
+flag
+Flag output
+delete
+Move to trash
+add
+New scene

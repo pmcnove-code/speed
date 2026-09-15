@@ -1,0 +1,80 @@
+https://flow.google.com/project/f7895cab-31b3-442a-8f17-d3b5c1af1287
+inEditor=false
+
+## labels
+Learn more about how Google uses cookies. Opens in a new tab.
+Hide
+Home
+Editable text
+More options for the project
+Search
+Filtering and sorting options
+Add media menu
+Product help
+Tile grid settings
+More options
+Account details
+PRO tier
+Google Account: Vetements Chic (vetementschic1@gmail.com), Google membership
+Project navigation
+Ingredient
+Clear prompt
+Add ingredients to the prompt box
+Agent
+Settings trigger
+Start generation
+
+## edit hrefs
+
+
+## media
+IMG 42x42 @1358,17
+IMG 32x32 @1363,22
+
+## play_circle boxes
+
+
+## text
+Skip to main content
+Start creating or drop media
+home
+more_vert
+search
+filter_list
+add
+help
+settings_2
+more_vert
+PRO
+dashboard
+All media
+accessibility_new
+Characters
+movie
+Scenes
+apps_spark_2
+Tools
+delete
+Bin
+left_panel_close
+Collapse
+error
+cancel
+cancel
+voice_selection
+error
+cancel
+cancel
+voice_selection
+close
+
+8-second 9:16 photoreal talking-head, part 1 of 6 of one continuous conversation. SPEAK ONLY THIS, verbatim, with natural lipsync, in the first 200ms, every word, no extras: "Your 5 AM alarm isn't discipline. It's your body running on fumes. I used to wake up tired." Use the attached Flow character "African Elder" with the custom voice named African Elder. Same face, same wardrobe. Do not recast. Do not invent a new person. BASE location for the whole reel (this clip only, not the rest of a storyboard): Two-shot contrast: first, a grim early morning with a mug of black coffee. Second, the speaker outside at dawn, energized, cooking eggs and liver in butter. Fast cuts between the 'old way' and the 'new way.'. Stay there. Same clothes. Do not jump to a different scene. Hook: tight on the face, no intro bumper. Start speaking immediately. The picture must match THESE words only. If they name an object, show that object. Do not illustrate a different line or a later scene. Camera may drift. Do not teleport. No burned-in captions. No music. No extra voiceover. No silence at the start or end.
+
+add
+Agent
+Video · 720p · 8s
+crop_9_16
+x2
+arrow_forward
+
+Google Flow can make mistakes, so double-check it
