@@ -1,5 +1,5 @@
-import {it,expect} from 'vitest';
-import {projectProgress} from './project-progress';
+import {describe,it,expect} from 'vitest';
+import {clipLiveLabel,projectProgress} from './project-progress';
 it('uses live clip progress ahead of a stale failed app record',()=>{
  const p=projectProgress({processing:true,detail:'Flow: [clip] C05/C07\nFlow: [script] C05 downloading',job:{status:'error',stage:'clips',error:'Old failure'}},5,7);
  expect(p.busy).toBe(true);expect(p.failed).toBe(false);expect(p.message).toBe('Downloading C05');expect(p.percent).toBeLessThan(85);
@@ -24,4 +24,19 @@ it('shows the worker queue position without implying rendering has started',()=>
 it('shows the attempt number for the current clip, without borrowing a previous clip attempt',()=>{
  const detail='Flow: [retry] C01 attempt 5/10\nFlow: [retry] C02 attempt 2/10\nFlow: [script] C02 downloading';
  expect(projectProgress({processing:true,detail},1,3).message).toBe('Downloading C02 · attempt 2 of 10');
+});
+
+describe('clipLiveLabel', () => {
+ it('labels a clip from its own live phase, not the shared log', () => {
+  const data = { clipPhases: { C03: { phase: 'rendering', attempts: 1 } } };
+  expect(clipLiveLabel(data, 'C03')).toBe('Rendering C03');
+ });
+ it('adds the attempt counter after the first attempt', () => {
+  const data = { clipPhases: { C02: { phase: 'acquiring', attempts: 3 } } };
+  expect(clipLiveLabel(data, 'C02')).toBe('Downloading C02 · attempt 3');
+ });
+ it('returns null when no live phase is known so callers fall back', () => {
+  expect(clipLiveLabel({}, 'C01')).toBeNull();
+  expect(clipLiveLabel({ clipPhases: { C01: { phase: 'bogus' } } }, 'C01')).toBeNull();
+ });
 });

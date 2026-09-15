@@ -1,4 +1,17 @@
-export type ProjectStatus={status?:string;queueAhead?:number;processing?:boolean;detail?:string;error?:string|null;job?:{status:string;stage:string;stageDetail?:string;error?:string|null}};
+export type ClipPhase={phase?:string|null;attempts?:number;updatedAt?:string|null};
+export type ProjectStatus={status?:string;queueAhead?:number;processing?:boolean;detail?:string;error?:string|null;clipPhases?:Record<string,ClipPhase>;job?:{status:string;stage:string;stageDetail?:string;error?:string|null}};
+
+const PHASE_LABEL:Record<string,string>={preflight:'Preparing',dispatching:'Starting',rendering:'Rendering',rendered:'Rendered',acquiring:'Downloading',validating:'Checking',verified:'Finished'};
+
+/** True per-clip live label from the worker's checkpoint (lanes run in parallel),
+ * or null when no live phase is known — caller falls back to the shared log line. */
+export function clipLiveLabel(data:ProjectStatus,clipId:string):string|null{
+ const c=data.clipPhases?.[clipId];
+ const label=c?.phase?PHASE_LABEL[c.phase]:undefined;
+ if(!label)return null;
+ const attempt=(c?.attempts??1)>1?` · attempt ${c!.attempts}`:'';
+ return `${label} ${clipId}${attempt}`;
+}
 export function projectProgress(data:ProjectStatus,ready:number,total:number,starting=false){
  const job=data.job;const busy=Boolean(starting||data.processing||['queued','running'].includes(job?.status||''));
  const detail=data.processing?data.detail||'':job?.stageDetail||data.detail||'';

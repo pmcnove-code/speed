@@ -253,6 +253,22 @@ function resumedPayload(job) {
   };
 }
 
+
+/** Per-clip live phase map for the UI, derived from the streaming checkpoint.
+ * Lanes run in parallel; this is the truth the single progress log cannot show. */
+function clipPhasesOf(job) {
+  const clips = job?.checkpoint?.clips || {};
+  const out = {};
+  for (const [id, c] of Object.entries(clips)) {
+    out[id] = {
+      phase: c.phase || null,
+      attempts: (Number(c.generationRetries) || 0) + 1,
+      updatedAt: c.updatedAt || null,
+    };
+  }
+  return out;
+}
+
 const MAX_CONCURRENT_LANES = 8;
 const MAX_SAME_ACCOUNT_LANES = 3;
 
@@ -867,7 +883,7 @@ const server = createServer(async (req, res) => {
     if(clipsMatch && req.method==="GET") {
       try {
         const job=jobs.get(clipsMatch[1]);
-        if(!clipsMatch[2]) return json(res,200,{...(await resultClips(job,join(DATA_DIR,"jobs"))),processing:["queued","running"].includes(job.status),status:job.status,queueAhead:queueAhead(jobs,job.id),error:job.error,detail:job.stageDetail});
+        if(!clipsMatch[2]) return json(res,200,{...(await resultClips(job,join(DATA_DIR,"jobs"))),processing:["queued","running"].includes(job.status),status:job.status,queueAhead:queueAhead(jobs,job.id),error:job.error,detail:job.stageDetail,clipPhases:clipPhasesOf(job)});
         const path=await resultClipFile(job,join(DATA_DIR,"jobs"),clipsMatch[2]);
         const bytes=await readFile(path);
         res.writeHead(200,{"content-type":"video/mp4","content-length":bytes.length});
