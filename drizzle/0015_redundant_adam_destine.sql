@@ -1,9 +1,9 @@
-CREATE TABLE "app_settings" (
+CREATE TABLE IF NOT EXISTS "app_settings" (
 	"key" varchar(64) PRIMARY KEY NOT NULL,
 	"value" text NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "knowledge_base" (
+CREATE TABLE IF NOT EXISTS "knowledge_base" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"title" varchar(160) NOT NULL,
 	"body" text NOT NULL,
@@ -14,7 +14,7 @@ CREATE TABLE "knowledge_base" (
 	"updated_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "persona_knowledge" (
+CREATE TABLE IF NOT EXISTS "persona_knowledge" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"persona_id" integer NOT NULL,
 	"note" text NOT NULL,
@@ -22,7 +22,7 @@ CREATE TABLE "persona_knowledge" (
 	"created_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "reel_jobs" (
+CREATE TABLE IF NOT EXISTS "reel_jobs" (
 	"queued_at" timestamp DEFAULT now() NOT NULL,
 	"id" serial PRIMARY KEY NOT NULL,
 	"status" varchar(16) DEFAULT 'queued' NOT NULL,
@@ -66,7 +66,7 @@ CREATE TABLE "reel_jobs" (
 	"video_label" varchar(160)
 );
 --> statement-breakpoint
-CREATE TABLE "script_clips" (
+CREATE TABLE IF NOT EXISTS "script_clips" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"batch_id" integer NOT NULL,
 	"clip_number" varchar(8) NOT NULL,
@@ -80,11 +80,29 @@ CREATE TABLE "script_clips" (
 	"created_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
-ALTER TABLE "personas" ALTER COLUMN "name" SET DATA TYPE varchar(160);--> statement-breakpoint
-ALTER TABLE "access_codes" ADD COLUMN "code" varchar(160);--> statement-breakpoint
-ALTER TABLE "batches" ADD COLUMN "airtable_sent_at" timestamp;--> statement-breakpoint
-ALTER TABLE "personas" ADD COLUMN "voice_id" varchar(160);--> statement-breakpoint
-ALTER TABLE "personas" ADD COLUMN "photo" "bytea";--> statement-breakpoint
-ALTER TABLE "personas" ADD COLUMN "photo_mime" varchar(64);--> statement-breakpoint
-ALTER TABLE "personas" ADD COLUMN "photo_updated_at" timestamp;--> statement-breakpoint
-ALTER TABLE "posts" ADD COLUMN "align_score" integer;
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='personas' AND column_name='name') THEN
+    ALTER TABLE "personas" ALTER COLUMN "name" SET DATA TYPE varchar(160);
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='access_codes' AND column_name='code') THEN
+    ALTER TABLE "access_codes" ADD COLUMN "code" varchar(160);
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='batches' AND column_name='airtable_sent_at') THEN
+    ALTER TABLE "batches" ADD COLUMN "airtable_sent_at" timestamp;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='personas' AND column_name='voice_id') THEN
+    ALTER TABLE "personas" ADD COLUMN "voice_id" varchar(160);
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='personas' AND column_name='photo') THEN
+    ALTER TABLE "personas" ADD COLUMN "photo" bytea;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='personas' AND column_name='photo_mime') THEN
+    ALTER TABLE "personas" ADD COLUMN "photo_mime" varchar(64);
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='personas' AND column_name='photo_updated_at') THEN
+    ALTER TABLE "personas" ADD COLUMN "photo_updated_at" timestamp;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='posts' AND column_name='align_score') THEN
+    ALTER TABLE "posts" ADD COLUMN "align_score" integer;
+  END IF;
+END $$;

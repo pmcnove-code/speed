@@ -144,9 +144,10 @@ export function flowFailure(code: string | null | undefined, message: string): F
     kind = CODE_TO_KIND[code];
   }
 
-  // Step 2: If no code or FLOW_TERMINAL/RECOVERY_EXHAUSTED, sniff message
-  if (!kind || code === "FLOW_TERMINAL" || code === "RECOVERY_EXHAUSTED") {
-    if (/not configured/i.test(message)) {
+
+  // Step 2: If no kind mapped yet or FLOW_TERMINAL, sniff message for fallback
+  if (!kind) {
+    if (code === "FLOW_TERMINAL" || /not configured/i.test(message)) {
       kind = "worker_down";
     } else if (/no Flow account/i.test(message)) {
       kind = "no_account";

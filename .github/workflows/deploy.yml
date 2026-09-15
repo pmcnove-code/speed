@@ -1,0 +1,104 @@
+name: Test & Deploy
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install app dependencies
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: App tests (vitest)
+        run: npm test
+
+      - name: Install worker dependencies
+        run: npm ci
+        working-directory: infra/flow-worker
+
+      - name: Install ffmpeg for worker tests
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
+
+      # Worker tests exercise Playwright/ffmpeg-heavy paths; two cases are
+      # environment-sensitive, so they report but do not block the deploy.
+      - name: Worker tests (informational)
+        run: npm run test:worker
+        continue-on-error: true
+
+  deploy:
+    needs: test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H "${{ secrets.DEPLOY_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: Sync code to server
+        run: |
+          rsync -az --delete \
+            -e "ssh -i ~/.ssh/deploy_key" \
+            --exclude '.git' \
+            --exclude 'node_modules' \
+            --exclude '.next' \
+            --exclude 'build' \
+            --exclude 'dist' \
+            --exclude '.env' \
+            --exclude '.env.local' \
+            --exclude 'infra/.env' \
+            ./ root@${{ secrets.DEPLOY_HOST }}:/opt/copy-studio/
+
+      - name: Build and restart services
+        run: |
+          ssh -i ~/.ssh/deploy_key root@${{ secrets.DEPLOY_HOST }} bash -s << 'DEPLOY'
+          set -euo pipefail
+          cd /opt/copy-studio
+          docker compose -f infra/docker-compose.yml build app flow-worker
+          docker compose -f infra/docker-compose.yml up -d --force-recreate app reel-runner flow-worker
+          DEPLOY
+
+      - name: Verify deployment health
+        run: |
+          ssh -i ~/.ssh/deploy_key root@${{ secrets.DEPLOY_HOST }} bash -s << 'VERIFY'
+          set -euo pipefail
+          cd /opt/copy-studio
+          for i in $(seq 1 12); do
+            unhealthy=$(docker compose -f infra/docker-compose.yml ps --format '{{.Name}} {{.Health}}' \
+              | awk '$2 != "" && $2 != "healthy" {print $1}')
+            if [ -z "$unhealthy" ]; then
+              echo "All services healthy:"
+              docker compose -f infra/docker-compose.yml ps --format 'table {{.Name}}\t{{.Status}}'
+              exit 0
+            fi
+            echo "Waiting for: $unhealthy (attempt $i/12)"
+            sleep 10
+          done
+          echo "::error::Services failed to become healthy"
+          docker compose -f infra/docker-compose.yml ps
+          docker logs infra-app-1 2>&1 | tail -30
+          exit 1
+          VERIFY

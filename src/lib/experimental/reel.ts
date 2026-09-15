@@ -29,9 +29,9 @@ async function setStage(
 async function loadPersonaForJob(job: ReelJob) {
   if (job.referencePersonaId) {
     const [locked] = await db.select().from(t.personas).where(eq(t.personas.id, job.referencePersonaId));
-    if (!locked?.photo?.length) throw new Error("The saved character reference is no longer available. Restore its photo in Personas before retrying.");
-    if (job.characterGender && assetGender(`${locked.name} ${locked.handle}`, FLOW_VOICE_PROFILES) !== job.characterGender) throw new Error("The saved reference does not match the selected gender. Choose a matching reference in Personas.");
-    return locked;
+    const genderOk = !job.characterGender || (locked && assetGender(`${locked.name} ${locked.handle}`, FLOW_VOICE_PROFILES) === job.characterGender);
+    if (locked?.photo?.length && genderOk) return locked;
+    // Saved reference unusable (photo removed or gender mismatch) — fall through to fallback selection.
   }
   let requested = null;
   if (job.postId) {
@@ -49,9 +49,12 @@ async function loadPersonaForJob(job: ReelJob) {
   }
   const available = !job.characterGender && requested?.photo?.length ? [] : await db.select().from(t.personas)
     .where(sql`octet_length(${t.personas.photo}) > 0`).orderBy(t.personas.id);
-  const selected = selectAvailableReference(requested, available, job.characterGender, job.sceneDirection?.characterDescription);
-  if (!selected && job.sceneDirection?.characterDescription)throw new Error("No unique saved character reference matches your description and gender. Use a character name from Personas with a reference photo.");
-  if (!selected) return !job.characterGender || (requested && assetGender(`${requested.name} ${requested.handle}`, FLOW_VOICE_PROFILES) === job.characterGender) ? requested : null; // The worker may have a matching saved character.
+  let selected = selectAvailableReference(requested, available, job.characterGender, job.sceneDirection?.characterDescription);
+  // Fallback: if no character matched by description, use first available
+  if (!selected) {
+    selected = available.length > 0 ? available[0] : requested;
+  }
+  if (!selected) return null; // No personas with photos at all; worker may have a matching saved character
   const character = resolveFlowVoice({ name: selected.name, handle: selected.handle }).character;
   await db.update(t.reelJobs).set({ referencePersonaId: selected.id, referenceCharacter: character }).where(eq(t.reelJobs.id, job.id));
   job.referencePersonaId = selected.id;
@@ -289,6 +292,12 @@ export async function runReelJob(id: number): Promise<void> {
       (err as { code?: string } | null)?.code !== "FLOW_TERMINAL" &&
       Number(latest?.runnerAttempts || 0) < 8;
     if (recoverableFlow) {
+      const flowCode = (err as { code?: string } | null)?.code ?? null;
+      if (flowCode === "PROJECT_CREDITS_WARNING" || flowCode === "CREDITS" || flowCode === "BLOCKED") {
+        // Flow-side hold (cost warning / rate limit): pace the retry instead of
+        // burning the whole recovery budget in seconds against a resting account.
+        await new Promise((resolve) => setTimeout(resolve, 5 * 60_000));
+      }
       await db
         .update(t.reelJobs)
         .set({

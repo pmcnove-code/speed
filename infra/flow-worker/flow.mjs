@@ -3855,12 +3855,7 @@ export async function generateReel(accountId, storageState, input, { downloadDir
         if (!lockedIdentity) {
           lockedIdentity = await resolveLiveIdentity(page, profile, onProgress);
           if (!lockedIdentity.character && !avatarPath) {
-            throw Object.assign(
-              new Error(
-                profile.genderLock ? `No matching ${profile.genderLock} character reference is available. Add a photo to a ${profile.genderLock} persona in Personas, or add a matching character in Flow, then try again. Generation was not started.` : `Flow has no character named ${profile.character}, and this persona has no reference photo. Upload the correct photo in Personas, or add ${profile.character} in Flow Characters, then try again. Generation was not started.`,
-              ),
-              { code: "CHARACTER_MISSING" },
-            );
+            onProgress?.(`Flow: no character reference available — generating without character attachment`);
           }
           if (!lockedIdentity.voice) {
             throw Object.assign(
@@ -3899,12 +3894,7 @@ export async function generateReel(accountId, storageState, input, { downloadDir
         };
         const attached = await attachIngredients(page, voiceArgs, onProgress);
         if (!attached.characterOk && !attached.imageOk) {
-          throw Object.assign(
-            new Error(
-              `Flow: ${clip.id} character ingredient did not attach (no ${profile.character} or Copy Studio in this Flow library). Generation was not started.`,
-            ),
-            { code: "ATTACH" },
-          );
+          onProgress?.(`Flow: ${clip.id} no character ingredient attached — continuing without character`);
         }
         if (!attached.voiceOk) {
           throw Object.assign(

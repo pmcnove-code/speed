@@ -254,7 +254,7 @@ function resumedPayload(job) {
 }
 
 const MAX_CONCURRENT_LANES = 8;
-const MAX_SAME_ACCOUNT_LANES = 8;
+const MAX_SAME_ACCOUNT_LANES = 3;
 
 /** Extracts the real account id from a lane id, which is either a bare
  * account id (one lane per distinct account) or `${accountId}::w${n}`
@@ -338,7 +338,10 @@ async function runConcurrentGeneration(job, body, candidates) {
         .map((a) => ({ laneId: a.id, realAccountId: a.id, label: a.label }));
     } else {
       const a = ready[0];
-      if (await hasChromeProfile(a.id)) return false;
+      // Same-account fan-out runs each window as an isolated plain context from
+      // the session snapshot saved at login; only a profile-locked account with
+      // no snapshot has to stay on the single-lane path.
+      if (!(await tryReadSession(a.id))) return false;
       laneSpecs = Array.from({ length: MAX_SAME_ACCOUNT_LANES }, (_, i) => ({
         laneId: `${a.id}::w${i}`,
         realAccountId: a.id,
