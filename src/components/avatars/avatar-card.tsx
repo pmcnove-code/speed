@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -193,11 +192,12 @@ export function AvatarCard({ avatar, onUpdate }: Props) {
           <div className="flex-shrink-0">
             {avatar.hasPhoto ? (
               <div className="relative w-40 h-40 rounded-lg overflow-hidden bg-muted">
-                <Image
+                {/* Plain img: these endpoints need the session cookie, which the next/image optimizer does not forward. */}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
                   src={`/api/avatars/${avatar.id}/photo`}
                   alt={avatar.name}
-                  fill
-                  className="object-cover"
+                  className="absolute inset-0 h-full w-full object-cover"
                 />
               </div>
             ) : (
@@ -290,11 +290,11 @@ export function AvatarCard({ avatar, onUpdate }: Props) {
                   }`}
                   onClick={() => handleSelectBackground(bg.id)}
                 >
-                  <Image
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
                     src={`/api/avatars/${avatar.id}/backgrounds/${bg.id}/image`}
                     alt={bg.label}
-                    fill
-                    className="object-cover"
+                    className="absolute inset-0 h-full w-full object-cover"
                   />
                 </div>
                 <p className="text-xs text-center mt-2 truncate">{bg.label}</p>

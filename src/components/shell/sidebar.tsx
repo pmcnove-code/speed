@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Beef, Users, History, BookOpen, DollarSign, Settings, Video, FileText } from "lucide-react";
+import { Beef, House, Users, History, BookOpen, DollarSign, Settings, Video, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatUsd } from "@/lib/cost";
 
 const NAV = [
+  { href: "/generate", label: "Generate", icon: House, adminOnly: false, exact: false },
   { href: "/scripts", label: "Scripts", icon: FileText, adminOnly: false, exact: false },
   { href: "/videos", label: "Videos", icon: Video, adminOnly: false, exact: false },
   { href: "/personas", label: "Personas", icon: Users, adminOnly: false, exact: false },

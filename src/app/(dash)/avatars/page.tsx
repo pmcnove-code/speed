@@ -67,7 +67,7 @@ export default function AvatarsPage() {
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div className="flex items-center gap-4">
           <Button asChild variant="ghost" size="sm">
-            <Link href="/scripts">
+            <Link href="/generate">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Generate
             </Link>
