@@ -1,6 +1,6 @@
 import { automaticallyEditClips } from "./auto-edit";
 import { lockGenderProfile, assetGender } from "../../../shared/flow/gender.mjs";
-import { eq, sql } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { db, t } from "@/db";
 import { getSetting } from "@/lib/config";
 import { probeMp4Duration } from "./ffmpeg";
@@ -24,6 +24,15 @@ async function setStage(
     .update(t.reelJobs)
     .set({ status, stage, stageDetail: detail, updatedAt: new Date() })
     .where(eq(t.reelJobs.id, id));
+}
+
+
+/** The persona's chosen subtitle style config, or undefined for worker defaults. */
+async function selectedSubtitleStyle(personaId: number | null): Promise<unknown | undefined> {
+  if (!personaId) return undefined;
+  const [row] = await db.select({ config: t.subtitleStyles.config }).from(t.subtitleStyles)
+    .where(and(eq(t.subtitleStyles.personaId, personaId), eq(t.subtitleStyles.selected, true))).limit(1);
+  return row?.config ?? undefined;
 }
 
 async function loadPersonaForJob(job: ReelJob) {
@@ -217,7 +226,7 @@ async function runFlowReel(id: number, copy: ReelCopy, job: ReelJob): Promise<vo
     throw Object.assign(new Error(current.error || "Flow worker finished without saved clips or a video."), {code:current.errorCode || "FLOW_TERMINAL"});
   }
   const bytes = current.clipsReady
-    ? await automaticallyEditClips(current.id, id, detail => setStage(id, "stitch", `${current.stageDetail || ""}\n${detail}`), {revision:current.recoveryRevision})
+    ? await automaticallyEditClips(current.id, id, detail => setStage(id, "stitch", `${current.stageDetail || ""}\n${detail}`), {revision:current.recoveryRevision, subtitleStyle: await selectedSubtitleStyle(job.referencePersonaId)})
     : await downloadFlowVideo(current.id);
   if (!bytes.length) throw new Error("Flow worker returned an empty video.");
   const durationMs = await probeMp4Duration(bytes);

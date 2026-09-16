@@ -6,7 +6,7 @@ export function subtitleText(text) {
 }
 
 /** Phrase boundaries follow punctuation; timestamps follow recognized speech. */
-export function captionPhrases(text, timings = [], durationMs = 8000) {
+export function captionPhrases(text, timings = [], durationMs = 8000, maxWords = 6) {
   const words = String(text || "").trim().split(/\s+/).filter(Boolean);
   if (!words.length) return [];
   const aligned = timings.length === words.length && timings.every((w, i) =>
@@ -24,7 +24,7 @@ export function captionPhrases(text, timings = [], durationMs = 8000) {
   });
   const phrases = [];
   for (const [begin, end] of clauses) {
-    const pages = Math.ceil((end - begin) / 6);
+    const pages = Math.ceil((end - begin) / Math.max(1, maxWords));
     const size = Math.ceil((end - begin) / pages);
     for (let first = begin; first < end; first += size) {
       const last = Math.min(first + size, end);

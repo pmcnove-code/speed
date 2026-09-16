@@ -30,7 +30,7 @@ export function editingSpec(paths, durations, captions, options = {}) {
     const transition = options.transition || captions[i]?.transition || "dissolve";
     if (!["cut", "dissolve", "fade"].includes(transition)) throw new Error("Unsupported scene transition");
     if (i && transition !== "cut") operations.push({ op: "transition", target: `clip${i - 1}`, slug: transition === "fade" ? "black-fade" : "mix", duration: transition === "fade" ? 8 / 24 : 4 / 24 });
-    for (const phrase of options.subtitles === false ? [] : (captions[i]?.phrases || captionPhrases(captions[i]?.text || "", captions[i]?.words || [], ms))) {
+    for (const phrase of options.subtitles === false ? [] : (captions[i]?.phrases || captionPhrases(captions[i]?.text || "", captions[i]?.words || [], ms, options.subtitleStyle?.behavior?.wordsPerLine || 6))) {
       const text = subtitleText(phrase.text);
       if (text) texts.push({ text, start: (offset + phrase.startMs) / 1000, duration: (phrase.endMs - phrase.startMs) / 1000, fontSize: (options.subtitleSize || 54) / 3, color: "#F5F5F5", y: options.subtitlePosition === "top" ? 0.66 : options.subtitlePosition === "middle" ? 0 : -0.66 });
     }

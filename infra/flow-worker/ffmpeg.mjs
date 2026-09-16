@@ -3,6 +3,7 @@ import { mkdir, mkdtemp, readFile, rename, rm, stat, writeFile } from "node:fs/p
 import { tmpdir } from "node:os";
 import { join, dirname } from "node:path";
 import { normalizeEditOptions } from "../../shared/flow/edit-options.mjs";
+import { normalizeSubtitleStyle } from "../../shared/flow/subtitle-style.mjs";
 import { createHash } from "node:crypto";
 import { clipEditPlan } from "./clip-edit.mjs";
 import { compileClipEdit, compileEditingTimeline } from "./capcut.mjs";
@@ -64,6 +65,29 @@ function escapeAss(text) {
     .replace(/\}/g, "\\}");
 }
 
+/** Convert hex color (#rrggbb) and opacity (0-1) to ASS &HAABBGGRR format. */
+function hexToAssColor(hex, opacity = 1) {
+  if (!hex || !/^#[0-9a-f]{6}$/i.test(hex)) return "&H00000000";
+  const r = hex.slice(1, 3);
+  const g = hex.slice(3, 5);
+  const b = hex.slice(5, 7);
+  const a = Math.round((1 - opacity) * 255).toString(16).padStart(2, "0");
+  return `&H${a}${b}${g}${r}`.toUpperCase();
+}
+
+/** Map position config to ASS numpad alignment (1-9). */
+function getAssAlignment(position) {
+  const { vertical = 84, align = "center" } = position || {};
+  let vPos; // 7/8/9 (top), 4/5/6 (middle), 1/2/3 (bottom)
+  if (vertical < 33) vPos = 7;
+  else if (vertical < 66) vPos = 4;
+  else vPos = 1;
+  
+  const hMap = { left: 0, center: 1, right: 2 };
+  const hOffset = hMap[align] ?? 1;
+  return vPos + hOffset;
+}
+
 export function srtTimestamp(ms) {
   const clamped = Math.max(0, Math.round(ms));
   const h = Math.floor(clamped / 3_600_000);
@@ -98,8 +122,39 @@ export function buildCaptionSrt(cues) {
   return parts.join("\n");
 }
 
-export function buildCaptionAss(cues) {
-  const header = `[Script Info]
+/** MarginV: distance from the vertical anchor edge, from a 0(top)-100(bottom) percent. */
+function assMarginV(vertical) {
+  const v = Number.isFinite(vertical) ? vertical : 84;
+  if (v < 33) return Math.max(40, Math.round((v / 100) * 1920));
+  if (v < 66) return 0;
+  return Math.max(40, Math.round(((100 - v) / 100) * 1920));
+}
+
+/** [Script Info]+[V4+ Styles]+[Events] header from a subtitle style config.
+ * `legacy` {subtitleSize, subtitlePosition} applies only when no style is given. */
+export function buildAssHeader(styleInput, legacy = {}) {
+  const cfg = normalizeSubtitleStyle(
+    styleInput || {
+      ...(legacy.subtitleSize ? { font: { size: legacy.subtitleSize } } : {}),
+      ...(legacy.subtitlePosition
+        ? { position: { vertical: legacy.subtitlePosition === "top" ? 12 : legacy.subtitlePosition === "middle" ? 50 : 84 } }
+        : {}),
+    },
+  );
+  const primary = hexToAssColor(cfg.fill.color);
+  const secondary = hexToAssColor(cfg.behavior.highlightColor);
+  const outline = hexToAssColor(cfg.stroke.color, styleInput ? 1 : 0.81);
+  const borderStyle = cfg.background.enabled ? 3 : 1;
+  const back = cfg.background.enabled
+    ? hexToAssColor(cfg.background.color, cfg.background.opacity)
+    : hexToAssColor(cfg.shadow.color, cfg.shadow.opacity);
+  const bold = cfg.font.weight >= 700 ? -1 : 0;
+  const italic = cfg.font.italic ? -1 : 0;
+  const alignment = getAssAlignment(cfg.position);
+  const marginV = assMarginV(cfg.position.vertical);
+  const styleLine = (name) =>
+    `Style: ${name},${cfg.font.family},${cfg.font.size},${primary},${secondary},${outline},${back},${bold},${italic},0,0,100,100,${cfg.font.letterSpacing},0,${borderStyle},${cfg.stroke.width},${cfg.shadow.depth},${alignment},${cfg.position.marginH},${cfg.position.marginH},${marginV},1`;
+  return `[Script Info]
 ScriptType: v4.00+
 PlayResX: 1080
 PlayResY: 1920
@@ -108,13 +163,38 @@ ScaledBorderAndShadow: yes
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Hook,Liberation Sans,54,&H00F5F5F5,&H000000FF,&H30000000,&H80000000,0,0,0,0,100,100,0,0,1,1.5,1,2,100,100,300,1
-Style: Body,Liberation Sans,54,&H00F5F5F5,&H000000FF,&H30000000,&H80000000,0,0,0,0,100,100,0,0,1,1.5,1,2,100,100,300,1
-Style: Cta,Liberation Sans,54,&H00F5F5F5,&H000000FF,&H30000000,&H80000000,0,0,0,0,100,100,0,0,1,1.5,1,2,100,100,300,1
+${styleLine("Hook")}
+${styleLine("Body")}
+${styleLine("Cta")}
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 `;
+}
+
+/** Dialogue text with the config's case transform and animation tags applied. */
+export function styledEventText(text, styleInput, durationMs = 1200, legacyFade = true) {
+  const clean = subtitleText(text);
+  if (!clean) return "";
+  if (!styleInput) return `${legacyFade ? "{\\fad(60,90)}" : ""}${escapeAss(clean)}`;
+  const cfg = normalizeSubtitleStyle(styleInput);
+  const body = cfg.font.uppercase ? clean.toUpperCase() : clean;
+  const anim = cfg.behavior.animation;
+  if (anim === "karaoke") {
+    const words = body.split(/\s+/).filter(Boolean);
+    const per = Math.max(1, Math.round(durationMs / 10 / Math.max(1, words.length)));
+    return words.map((w) => `{\\k${per}}${escapeAss(w)}`).join(" ");
+  }
+  const tags =
+    anim === "fade" ? "{\\fad(60,90)}"
+    : anim === "pop" ? "{\\fad(40,60)\\fscx80\\fscy80\\t(0,120,\\fscx100\\fscy100)}"
+    : "";
+  return `${tags}${escapeAss(body)}`;
+}
+
+export function buildCaptionAss(cues, styleInput) {
+  const header = buildAssHeader(styleInput);
+  const maxWords = styleInput ? normalizeSubtitleStyle(styleInput).behavior.wordsPerLine : 6;
   let t = 0;
   const events = [];
   (cues || []).forEach((cue, i) => {
@@ -122,12 +202,11 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
     const dur = Math.max(400, Number(cue?.durationMs) || 8000);
     t += dur;
     const style = assStyle(cueRole(cue, i));
-    const fade = "{\\fad(60,90)}";
-    for (const phrase of captionPhrases(cueText(cue), cue?.words || [], dur)) {
-      const text = subtitleText(phrase.text);
+    for (const phrase of captionPhrases(cueText(cue), cue?.words || [], dur, maxWords)) {
+      const text = styledEventText(phrase.text, styleInput, phrase.endMs - phrase.startMs);
       if (!text) continue;
       events.push(
-        `Dialogue: 0,${assTimestamp(start + phrase.startMs)},${assTimestamp(start + phrase.endMs)},${style},,0,0,0,,${fade}${escapeAss(text)}`,
+        `Dialogue: 0,${assTimestamp(start + phrase.startMs)},${assTimestamp(start + phrase.endMs)},${style},,0,0,0,,${text}`,
       );
     }
   });
@@ -310,10 +389,9 @@ async function assembleEditedClips(clipPaths, destPath, captions = [], editOptio
       words: raw?.words || [],
     };
   });
-  const header = buildCaptionAss([]).replaceAll("Sans,54,", `Sans,${options.subtitleSize},`).replaceAll(",2,100,100,300,1", `,${options.subtitlePosition === "top" ? 8 : options.subtitlePosition === "middle" ? 5 : 2},100,100,300,1`);
-  const fade = options.subtitleFade ? "{\\fad(60,90)}" : "";
+  const header = buildAssHeader(options.subtitleStyle, { subtitleSize: options.subtitleSize, subtitlePosition: options.subtitlePosition });
   const assBody = header + timeline.subtitles.map(cue =>
-    `Dialogue: 0,${assTimestamp(cue.startMs)},${assTimestamp(cue.endMs)},Body,,0,0,0,,${fade}${escapeAss(cue.text)}`
+    `Dialogue: 0,${assTimestamp(cue.startMs)},${assTimestamp(cue.endMs)},Body,,0,0,0,,${styledEventText(cue.text, options.subtitleStyle, cue.endMs - cue.startMs, options.subtitleFade)}`
   ).join("\n") + "\n";
   const srtBody = options.subtitles ? buildCaptionSrt(captionCues) : "";
   try {

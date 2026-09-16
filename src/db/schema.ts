@@ -129,6 +129,28 @@ export type ReelShot = {
   visual: string;
 };
 
+export const personaBackgrounds = pgTable("persona_backgrounds", {
+  id: serial("id").primaryKey(),
+  personaId: integer("persona_id").notNull().references(() => personas.id, { onDelete: "cascade" }),
+  label: varchar("label", { length: 80 }).notNull(),
+  image: bytea("image").notNull(),
+  imageMime: varchar("image_mime", { length: 64 }).notNull(),
+  selected: boolean("selected").notNull().default(false),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+export type PersonaBackground = typeof personaBackgrounds.$inferSelect;
+
+export const subtitleStyles = pgTable("subtitle_styles", {
+  id: serial("id").primaryKey(),
+  personaId: integer("persona_id").notNull().references(() => personas.id, { onDelete: "cascade" }),
+  name: varchar("name", { length: 80 }).notNull(),
+  config: jsonb("config").notNull(),
+  selected: boolean("selected").notNull().default(false),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+export type SubtitleStyle = typeof subtitleStyles.$inferSelect;
+
 export const reelJobs = pgTable("reel_jobs", {
   queuedAt: timestamp("queued_at").notNull().defaultNow(),
   id: serial("id").primaryKey(),

@@ -6,9 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Plus, Search, RefreshCw } from "lucide-react";
+import { Plus, Search, RefreshCw, Users } from "lucide-react";
 import Link from "next/link";
-
 interface Batch {
   id: number;
   countRequested: number;
@@ -70,12 +69,20 @@ export default function ScriptsPage() {
           <h1 className="text-3xl font-bold">Scripts & Batches</h1>
           <p className="text-sm text-muted-foreground mt-1">Manage your script generation batches</p>
         </div>
-        <Button asChild size="lg">
-          <Link href="/scripts/new">
-            <Plus className="mr-2 h-4 w-4" />
-            New Batch
-          </Link>
-        </Button>
+        <div className="flex gap-2">
+          <Button asChild variant="outline">
+            <Link href="/avatars">
+              <Users className="mr-2 h-4 w-4" />
+              Avatars
+            </Link>
+          </Button>
+          <Button asChild size="lg">
+            <Link href="/scripts/new">
+              <Plus className="mr-2 h-4 w-4" />
+              New Batch
+            </Link>
+          </Button>
+        </div>
       </div>
 
       {/* Search */}
