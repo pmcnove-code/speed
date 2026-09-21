@@ -1,5 +1,6 @@
 import {MAX_CLIP_ATTEMPTS,generationDeadline,JOB_TIMEOUT_MESSAGE,CLIP_RETRY_LIMITS,retryDelayMs,freshAttemptMetadata} from "./retry-policy.mjs";
 import { partitionClipsForLanes } from "./partition.mjs";
+import { createClipPool } from "./clip-pool.mjs";
 import { strictClipPrompt } from "./clip-v33.mjs";
 import { createRenderBudget } from "./render-budget.mjs";
 import { assetGender } from "../../shared/flow/gender.mjs";
@@ -3449,9 +3450,14 @@ export async function generateReel(accountId, storageState, input, { downloadDir
     // Internal-only: set by generateReelConcurrent to make one account produce
     // only its lane's slice of the video while the rest run on other accounts.
     const laneClipIds = Array.isArray(input.__laneClipIds) ? input.__laneClipIds : null;
-    const clips = laneClipIds ? allClips.filter((c) => laneClipIds.includes(c.id)) : allClips;
+    // Shared pool: the lane pulls clips as it finishes them instead of owning a fixed slice.
+    const pool = input.__clipPool || null;
+    if (pool && transport === "rpc") {
+      throw Object.assign(new Error("Shared clip pool needs the browser transport."), { code: "RPC" });
+    }
+    const clips = pool ? [] : laneClipIds ? allClips.filter((c) => laneClipIds.includes(c.id)) : allClips;
     const speechKeys = speechKeysFrom(input);
-    if (!clips.length) throw new Error("Need a script to split into Flow clips.");
+    if (!(pool ? allClips.length : clips.length)) throw new Error("Need a script to split into Flow clips.");
 
     onProgress?.(`Flow: setup ${profile.character}…`);
     onProgress?.("Flow: [ok] scripted recover only — no Gemini");
@@ -4018,9 +4024,27 @@ export async function generateReel(accountId, storageState, input, { downloadDir
         }
       }
 
-      for (let i = 0; i < clips.length; i++) {
-        const clip = clips[i];
-        if (i > 0) {
+      const laneClips = pool ? [] : clips;
+      let handled = 0;
+      let currentClipId = null;
+      try {
+      while (true) {
+        let clip;
+        if (pool) {
+          const claimedId = pool.claim(accountId);
+          if (claimedId === null) break;
+          clip = allClips.find((c) => c.id === claimedId);
+          if (!clip) {
+            pool.fail(claimedId);
+            continue;
+          }
+          laneClips.push(clip);
+        } else {
+          if (handled >= clips.length) break;
+          clip = clips[handled];
+        }
+        currentClipId = clip.id;
+        if (handled++ > 0) {
           onProgress?.(
             `Flow: [rate-limit] waiting ${INTER_GENERATION_MS}ms before ${clip.id}`,
           );
@@ -4047,6 +4071,8 @@ export async function generateReel(accountId, storageState, input, { downloadDir
             if (take.ok && (!state.mediaHash || state.mediaHash === hash)) {
               clipHashes.add(hash);
               paths.push(existingPath);
+              pool?.done(clip.id);
+              currentClipId = null;
               onProgress?.(`Flow: [ok] ${clip.id} restored from verified checkpoint`);
               continue;
             }
@@ -4131,21 +4157,28 @@ export async function generateReel(accountId, storageState, input, { downloadDir
           );
         }
         paths.push(dest);
+        pool?.done(clip.id);
+        currentClipId = null;
       }
-      if (paths.length !== clips.length && Array.isArray(input.recoveryTargetIds)) {
-        onProgress?.(`Flow: [ok] Selected clips saved; ${clips.length-paths.length} other clips still need attention`);
+      } catch (laneError) {
+        // A failed clip stays failed: it is never re-queued to another lane, so no second paid dispatch.
+        if (pool && currentClipId) pool.fail(currentClipId);
+        throw laneError;
+      }
+      if (paths.length !== laneClips.length && Array.isArray(input.recoveryTargetIds)) {
+        onProgress?.(`Flow: [ok] Selected clips saved; ${laneClips.length-paths.length} other clips still need attention`);
         return {videoPath:null,clipsReady:false,partialClips:true,credits:session.credits,email:session.email,clips:paths.length};
       }
-      if (paths.length !== clips.length) {
-        throw new Error(`Flow: ${clips.length - paths.length} clip(s) missing — will not stitch a partial reel.`);
+      if (paths.length !== laneClips.length) {
+        throw new Error(`Flow: ${laneClips.length - paths.length} clip(s) missing — will not stitch a partial reel.`);
       }
 
-      if (laneClipIds) {
+      if (laneClipIds || pool) {
         // A lane's own captions/edit-source assembly happens once, in
         // generateReelConcurrent, after every lane finishes — using the full
         // clip list so caption roles and clip order stay correct.
         const credits = parseCreditsFromText(await bodyText(page)) ?? session.credits;
-        return { laneDone: true, laneClipIds: clips.map((c) => c.id), credits, email: session.email };
+        return { laneDone: true, laneClipIds: laneClips.map((c) => c.id), credits, email: session.email };
       }
 
       const captions = await Promise.all(clips.map(async (c, i) => ({ text: c.onScreen || "", spoken: c.spoken, hold: c.hold, role: captionRole(c, i), words: c.hold ? [] : await captionWordsFor(paths[i], speechKeys), transition: c.scene?.transition || "dissolve" })));
@@ -4171,7 +4204,21 @@ export async function generateReel(accountId, storageState, input, { downloadDir
  * lane (identical to calling generateReel directly) when only one lane, or
  * fewer clips than lanes, are available.
  */
-export async function generateReelConcurrent(lanes, input, { downloadDir, onProgress, onCheckpoint } = {}) {
+export async function generateReelConcurrent(lanes, input, { downloadDir, onProgress, onCheckpoint, onLaneFinished, laneRunner = generateReel } = {}) {
+  // Tells the caller as soon as one lane settles so its account can be freed for other videos.
+  const watchLane = (lane, promise) =>
+    !onLaneFinished
+      ? promise
+      : promise.then(
+          async (value) => {
+            await Promise.resolve(onLaneFinished(lane, null)).catch(() => undefined);
+            return value;
+          },
+          async (error) => {
+            await Promise.resolve(onLaneFinished(lane, error)).catch(() => undefined);
+            throw error;
+          },
+        );
   const profile = resolveFlowVoice({
     name: input.personaName,
     handle: input.personaHandle,
@@ -4202,13 +4249,66 @@ export async function generateReelConcurrent(lanes, input, { downloadDir, onProg
     );
   }
 
-  const outcomes = await Promise.allSettled(
+  // Shared pool is skipped (fixed slices, as before) for the RPC transport, a
+  // single lane, the FLOW_CLIP_POOL=0 kill switch, or a resume that holds
+  // in-flight clips we cannot map back to the lane whose project contains them.
+  const resumeClips = input?.resume?.clips && typeof input.resume.clips === "object" ? input.resume.clips : {};
+  let pool = null;
+  let poolOwned = {};
+  const orphanIds = new Set();
+  if (process.env.FLOW_CLIP_POOL !== "0" && flowGenerationTransport() !== "rpc" && activeLanes.length > 1) {
+    const targetSet = new Set(clipsToAssign.map((c) => c.id));
+    const ownedAll = new Set();
+    for (const lane of activeLanes) {
+      poolOwned[lane.accountId] = (lane.ownedClipIds || []).filter((id) => resumeClips[id] && targetSet.has(id));
+      for (const id of poolOwned[lane.accountId]) ownedAll.add(id);
+    }
+    const orphans = Object.entries(resumeClips).filter(([id]) => targetSet.has(id) && !ownedAll.has(id));
+    if (orphans.every(([, cp]) => cp?.clipState?.phase === "verified")) {
+      for (const [id] of orphans) orphanIds.add(id);
+      pool = createClipPool([...targetSet], { owned: poolOwned });
+      for (const lane of activeLanes) pool.reserve(lane.accountId);
+      onProgress?.(
+        `Flow: [concurrent] shared clip pool — ${activeLanes.length} lanes each take the next clip as soon as they finish one`,
+      );
+    }
+  }
+
+  let pooledOutcomes = null;
+  if (pool) {
+    pooledOutcomes = await Promise.allSettled(
+      activeLanes.map((lane) => {
+        const mine = new Set(poolOwned[lane.accountId]);
+        const laneEntries = Object.fromEntries(
+          Object.entries(resumeClips).filter(([id]) => mine.has(id) || orphanIds.has(id)),
+        );
+        return watchLane(lane, laneRunner(
+          lane.accountId,
+          lane.storageState,
+          {
+            ...input,
+            __clipPool: pool,
+            flowProjectUrl: lane.resumeProjectUrl,
+            projectUrl: undefined,
+            resume: Object.keys(resumeClips).length ? { ...input.resume, clips: laneEntries } : input.resume,
+          },
+          {
+            downloadDir,
+            onProgress: (detail) => onProgress?.(detail, lane.accountLabel),
+            onCheckpoint: (checkpoint) => onCheckpoint?.({ ...checkpoint, accountId: lane.accountId }),
+          },
+        ).then((result) => ({ lane, laneIds: result?.laneClipIds || [], result })));
+      }),
+    );
+  }
+
+  const outcomes = pooledOutcomes || await Promise.allSettled(
     activeLanes.map((lane, laneIndex) => {
       const laneIds = chunks[laneIndex].map((c) => c.id);
       const laneResume = input?.resume?.clips && typeof input.resume.clips === "object"
         ? Object.fromEntries(Object.entries(input.resume.clips).filter(([id]) => laneIds.includes(id)))
         : undefined;
-      return generateReel(
+      return watchLane(lane, laneRunner(
         lane.accountId,
         lane.storageState,
         {
@@ -4223,11 +4323,12 @@ export async function generateReelConcurrent(lanes, input, { downloadDir, onProg
           onProgress: (detail) => onProgress?.(detail, lane.accountLabel),
           onCheckpoint: (checkpoint) => onCheckpoint?.({ ...checkpoint, accountId: lane.accountId }),
         },
-      ).then((result) => ({ lane, laneIds, result }));
+      ).then((result) => ({ lane, laneIds, result })));
     }),
   );
 
-  const doneIds = new Set();
+  // With the pool, clips a lane finished before it failed still count as done.
+  const doneIds = new Set(pool ? pool.doneIds() : []);
   const laneFailures = [];
   let anyCredits = null;
   let anyEmail = null;

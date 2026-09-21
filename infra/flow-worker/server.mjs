@@ -9,6 +9,7 @@ import { mkdir, readFile, stat } from "node:fs/promises";
 import { join } from "node:path";
 import { classifyFlowFailure, orderAccountsForRotate } from "./rotate.mjs";
 import { queueAhead, queueLine, compareQueue, queueTime } from "./queue.mjs";
+import { createLaneRelease } from "./lane-release.mjs";
 import {
   clearSession,
   createAccount,
@@ -45,13 +46,16 @@ function claimAccount(accountId) {
 function releaseAccount(accountId) {
   busyAccounts.delete(accountId);
 }
-let generating = false;
+let generatingJobs = 0;
 let jobsLoaded = false;
 const persistTimers = new Map();
 let flowEngine;
 
 async function loadFlowEngine() {
-  flowEngine ||= import("./flow.mjs");
+  // Tests may swap in a fake render engine; ignored outside NODE_ENV=test.
+  flowEngine ||= import(
+    process.env.NODE_ENV === "test" && process.env.FLOW_TEST_ENGINE_MODULE ? process.env.FLOW_TEST_ENGINE_MODULE : "./flow.mjs"
+  );
   return flowEngine;
 }
 
@@ -377,6 +381,7 @@ async function runConcurrentGeneration(job, body, candidates) {
     return false;
   }
 
+  let leases = null;
   try {
     const sessionByRealId = new Map();
     const lanes = [];
@@ -396,6 +401,7 @@ async function runConcurrentGeneration(job, body, candidates) {
         accountLabel: spec.label,
         storageState: sessionByRealId.get(spec.realAccountId),
         resumeProjectUrl: previousLanes?.[spec.laneId]?.projectUrl || "",
+        ownedClipIds: previousLanes?.[spec.laneId]?.clipIds || [],
       });
     }
     job.accountId = null;
@@ -406,8 +412,19 @@ async function runConcurrentGeneration(job, body, candidates) {
     const downloadDir = join(DATA_DIR, "jobs", job.id);
     await mkdir(downloadDir, { recursive: true, mode: 0o700 });
     const { generateReelConcurrent } = await loadFlowEngine();
+    leases = createLaneRelease({ lanes, realIdOf: laneRealAccountId, release: releaseAccount });
     const result = await generateReelConcurrent(lanes, body, {
       downloadDir,
+      // Free each account as soon as its lane is done so a waiting video can use it.
+      onLaneFinished: async (lane, error) => {
+        if (error) {
+          const laneMessage = error instanceof Error ? error.message : String(error);
+          await updateAccount(laneRealAccountId(lane.accountId), accountPatchForFailure(error, laneMessage).patch);
+        }
+        if (leases.laneFinished(lane.accountId)) {
+          appendJobLog(job, `Flow: [concurrent] ${lane.accountLabel} finished its clips — account released for other videos`);
+        }
+      },
       onProgress: (detail, accountLabel) => {
         appendJobLog(job, detail, accountLabel);
         structuredJobEvent(job, "flow.progress", {
@@ -492,7 +509,9 @@ async function runConcurrentGeneration(job, body, candidates) {
     }
     return false;
   } finally {
-    for (const id of claimedRealIds) releaseAccount(id);
+    // Only release what is still held; early-released accounts may already belong to another video.
+    if (leases) leases.releaseAll(claimedRealIds);
+    else for (const id of claimedRealIds) releaseAccount(id);
   }
 }
 
@@ -505,7 +524,7 @@ async function runGenerateJob(job) {
   job.startedAt = job.startedAt || new Date().toISOString();
   appendJobLog(job, "Flow: setup…");
   await persistNow(job);
-  generating = true;
+  generatingJobs += 1;
   try {
   const listed = await listAccounts();
   const ordered = orderAccountsForRotate(listed.accounts, listed.lastPickedId);
@@ -522,6 +541,7 @@ async function runGenerateJob(job) {
   const failures = [];
   const tried = new Set();
   let notifiedWaiting = false;
+  let waitedForCapacity = false;
 
   while (tried.size < candidates.length) {
     const loginBlocked = (a) => login.active && login.accountId === a.id;
@@ -539,8 +559,19 @@ async function runGenerateJob(job) {
         appendJobLog(job, "Flow: waiting for an available account (busy generating other videos)…");
         notifiedWaiting = true;
       }
-      await sleep(4000);
+      waitedForCapacity = true;
+      await sleep(Number(process.env.FLOW_QUEUE_POLL_MS) || 4000);
       continue;
+    }
+
+    if (waitedForCapacity) {
+      waitedForCapacity = false;
+      // Capacity freed up while this video waited: try the multi-lane path again rather than
+      // dropping to one account that renders a single clip at a time.
+      const relisted = await listAccounts();
+      const fresh = orderAccountsForRotate(relisted.accounts, relisted.lastPickedId);
+      const freshCandidates = job.checkpoint?.projectUrl && job.accountId ? fresh.filter((a) => a.id === job.accountId) : fresh;
+      if (freshCandidates.length && (await runConcurrentGeneration(job, body, freshCandidates))) return;
     }
 
     const account = readyNow[0];
@@ -625,7 +656,7 @@ async function runGenerateJob(job) {
   }
   throw new Error(failures.length ? `All Flow accounts failed.\n${failures.join("\n")}` : "No Flow account could generate.");
   } finally {
-    generating = false;
+    generatingJobs = Math.max(0, generatingJobs - 1);
   }
 }
 
@@ -680,7 +711,7 @@ const server = createServer(async (req, res) => {
       return json(res, jobsLoaded ? 200 : 503, {
         ok: jobsLoaded,
         ready: jobsLoaded,
-        generating,
+        generating: generatingJobs > 0,
         jobs: jobs.size,
       });
     }
@@ -761,7 +792,7 @@ const server = createServer(async (req, res) => {
           const login = await confirmLogin(id);
           return json(res, 200, { login });
         }
-        if (generating) {
+        if (generatingJobs > 0) {
           return json(res, 409, {
             error: "A reel is generating on the logged-in account. Wait until it finishes before signing in.",
           });

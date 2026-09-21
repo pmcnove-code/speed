@@ -40,6 +40,9 @@ infra/flow-worker/data/
 **/flow-session*.json
 **/flow-sessions/
 
+# local working notes and client messages — never commit
+/my work/
+
 # vercel
 .vercel
 
