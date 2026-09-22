@@ -83,6 +83,25 @@ Worker (docker network only, `x-flow-secret` header):
 If no Flow session is connected, Experimental uses the official Gemini Omni API key
 (720p) and falls back to Gemini stills.
 
+## Project layout
+
+| Path | Role |
+| --- | --- |
+| `src/` | Next.js app, API routes, UI, copy engine, reel orchestration |
+| `shared/flow/` | Clip/scene contracts shared by the app and Flow worker |
+| `infra/` | Production Compose, Caddy, deploy/provision, `flow-worker` |
+| `scripts/` | DB migrate/seed, reel runner, Airtable helpers |
+| `docs/` | Guides, contracts, design PDFs, verification reports — see [docs/README.md](docs/README.md) |
+| `drizzle/` | SQL migrations |
+
+## Documentation
+
+- [docs/README.md](docs/README.md) — index
+- [Batch integration](docs/guides/batch-integration.md)
+- [Concurrent generation](docs/guides/concurrent-generation.md)
+- [Editing API](docs/contracts/editing-api.md)
+- [Flow v3.3 contract](docs/contracts/flow-v33-contract.md)
+
 ## Enabling DeepSeek
 
 Set `DEEPSEEK_API_KEY` (server env) and redeploy. Until then the DeepSeek option shows as

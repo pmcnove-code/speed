@@ -20,6 +20,8 @@ rsync -az --delete \
   --exclude node_modules --exclude .next --exclude .git \
   --exclude '.env*' --exclude drizzle/meta/_journal.lock \
   --exclude 'infra/flow-worker/data' --exclude '**/flow-sessions' \
+  --exclude 'my work' --exclude '.claude' --exclude '.hallmark' \
+  --exclude '*.log' --exclude '.tmp*' --exclude 'docs/evidence' \
   "$ROOT/" "${TARGET}:${REMOTE_DIR}/"
 
 echo "==> Ensuring Flow worker secret exists (not printed)"

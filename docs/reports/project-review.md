@@ -10,7 +10,7 @@ Reviewed September 10, 2026. This is a local code and available-history review, 
 - The historical recap reports an initial deployment on September 3 to `161.97.122.60`, including a successful generation smoke test. That is a historical assertion, not a verification performed in this review.
 - The current README and deployment script target `62.83.10.231`, under `/opt/copy-studio`. The exact migration timeline and present live server state were not established.
 - A separate source pack exists at `/Users/john/projects/copy-studio-v2-research/knowledge-pack.md`. It covers creator formats, audience language, FAQs, a claims map, disclaimers, 60 angles, and sources. Its editorial instructions describe an earlier approach and should not be assumed to match current runtime behavior.
-- Saved browser dumps and screenshots document Flow troubleshooting around September 9–10. `.tmp-flow-proof/last-error-ui.txt` includes an unusual-activity rejection and Google's statement that the failed generation was not charged. It also shows a library of existing video tiles. Tiles alone do not verify successful final reel assembly.
+- Saved browser dumps and screenshots document Flow troubleshooting around September 9–10. `docs/evidence/flow-proof/last-error-ui.txt` includes an unusual-activity rejection and Google's statement that the failed generation was not charged. It also shows a library of existing video tiles. Tiles alone do not verify successful final reel assembly.
 - Secrets and historical access-code values are intentionally omitted from this review.
 
 ## Product and architecture

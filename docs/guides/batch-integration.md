@@ -2,7 +2,7 @@
 
 ## Overview
 
-The **BatchView** component implements the Workflow.pdf design for batch-centric video production. All clips in a batch generate **concurrently** with unified progress tracking.
+The **BatchView** component implements the [workflow](../design/workflow.pdf) design for batch-centric video production. All clips in a batch generate **concurrently** with unified progress tracking.
 
 ## Architecture
 
@@ -365,7 +365,7 @@ src/
 ✅ **Type-safe** - Full TypeScript, no `any` casts  
 ✅ **Error handling** - Toast notifications + error badges  
 ✅ **Visual feedback** - Progress bars, status badges, counters  
-✅ **Workflow.pdf alignment** - Scripts → Review → Generate All → Videos  
+✅ **Workflow alignment** (`docs/design/workflow.pdf`) - Scripts → Review → Generate All → Videos  
 
 ---
 
